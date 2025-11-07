@@ -1,0 +1,30 @@
+- dataset: icd10
+  data_version: "ICD10 Jan 2025 (combined sources)"
+  sources:
+  - source_name: "ICD10 Valid"
+    source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
+    original_filename: "section111validicd10-jan2025_0.xlsx"
+    retrieved: "2025-10-29"
+  - source_name: "ICD10 Excluded"
+    source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
+    original_filename: "section111excludedicd10-jan2025_0.xlsx"
+    retrieved: "2025-10-29"
+
+- dataset: icd9
+  data_version: "ICD9 Jan 2025 (combined sources)"
+  sources:
+  - source_name: "ICD9 Valid"
+    source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
+    original_filename: "section111validicd9-jan2025_0.xlsx"
+    retrieved: "2025-10-29"
+  - source_name: "ICD9 Excluded"
+    source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
+    original_filename: "section111excludedicd9-jan2025_0.xlsx"
+    retrieved: "2025-10-29"
+
+- dataset: cpt
+  data_version: "CPT 2024-11-26"
+  source_url: "https://www.cms.gov/license/ama?file=/files/zip/list-codes-effective-january-1-2025-published-november-26-2024.zip"
+  retrieved: "2025-10-29"
+  original_filename: "2025_DHS_Code_List_Addendum_11_26_2024.xlsx"
+  
