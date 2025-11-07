@@ -1,5 +1,6 @@
 - dataset: icd10
   data_version: "ICD10 Jan 2025 (combined sources)"
+  retrieved: "2025-10-29"
   sources:
   - source_name: "ICD10 Valid"
     source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
@@ -12,6 +13,7 @@
 
 - dataset: icd9
   data_version: "ICD9 Jan 2025 (combined sources)"
+  retrieved: "2025-10-29"
   sources:
   - source_name: "ICD9 Valid"
     source_url: "https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists"
