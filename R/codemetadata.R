@@ -5,7 +5,7 @@
 #' multiple sources, the returned list preserves the `sources` sub-list and
 #' includes combination metadata when present.
 #'
-#' @param dataset Character. The dataset name to look up.  This can be one of 3
+#' @param dataset Character. The dataset name to look up.  This can be one of three
 #' possibilities: 'icd9', 'icd10', or 'cpt'.
 #' @param file Character. Path to VERSIONS.yaml. Defaults to the installed package:
 #'        system.file("extdata", "VERSIONS.yaml", package = "electronco").
