@@ -1,14 +1,12 @@
-#' Read package VERSIONS.yaml and return a data frame of key fields.
+#' Read VERSIONS.yaml and return a data frame of key fields.
 #'
-#' Returns a tibble with columns: dataset, data_version, and retrieved.
+#' Returns a tibble with the following columns: dataset, data_version, and retrieved.
 #' Looks for VERSIONS.yaml under inst/extdata of the installed package.
 #'
 #' @param file Path to VERSIONS.yaml. Defaults to system file in the installed package.
 #' @return tibble with the following columns: dataset, data_version, and retrieved.
 #' @examples
-#' # use default
-#' # codeversions()
-#' # or point to a VERSIONS.yaml in your repo
+#' codeversions()
 #'
 codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
   # lazy-load required packages to avoid adding hard Depends
