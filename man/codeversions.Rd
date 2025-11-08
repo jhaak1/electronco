@@ -2,7 +2,7 @@
 % Please edit documentation in R/codeversions.R
 \name{codeversions}
 \alias{codeversions}
-\title{Read package VERSIONS.yaml and return a data frame of key fields.}
+\title{Read VERSIONS.yaml and return a data frame of key fields.}
 \usage{
 codeversions(
   file = system.file("extdata", "VERSIONS.yaml", package = "electronco")
@@ -15,12 +15,10 @@ codeversions(
 tibble with the following columns: dataset, data_version, and retrieved.
 }
 \description{
-Returns a tibble with columns: dataset, data_version, and retrieved.
+Returns a tibble with the following columns: dataset, data_version, and retrieved.
 Looks for VERSIONS.yaml under inst/extdata of the installed package.
 }
 \examples{
-# use default
-# codeversions()
-# or point to a VERSIONS.yaml in your repo
+codeversions()
 
 }
