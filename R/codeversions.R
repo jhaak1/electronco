@@ -7,7 +7,6 @@
 #' @return tibble with the following columns: dataset, data_version, and retrieved.
 #' @examples
 #' codeversions()
-#'
 codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
   # lazy-load required packages to avoid adding hard Depends
   if (!nzchar(file)) stop("VERSIONS.yaml not found in installed package. Check installation or supply `file`.")

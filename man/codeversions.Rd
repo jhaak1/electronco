@@ -20,5 +20,4 @@ Looks for VERSIONS.yaml under inst/extdata of the installed package.
 }
 \examples{
 codeversions()
-
 }
