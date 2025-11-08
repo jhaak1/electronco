@@ -2,7 +2,7 @@
 % Please edit documentation in R/codemetadata.R
 \name{codemetadata}
 \alias{codemetadata}
-\title{Retrieve full provenance for a packaged code list (ICD9, ICD10, CPT).}
+\title{Retrieve full provenance for a packaged code list (ICD9, ICD10, or CPT).}
 \usage{
 codemetadata(
   dataset,
@@ -10,7 +10,8 @@ codemetadata(
 )
 }
 \arguments{
-\item{dataset}{Character. The dataset name to look up (e.g. "icd10").}
+\item{dataset}{Character. The dataset name to look up.  This can be one of 3
+possibilities: 'icd9', 'icd10', or 'cpt'.}
 
 \item{file}{Character. Path to VERSIONS.yaml. Defaults to the installed package:
 system.file("extdata", "VERSIONS.yaml", package = "electronco").}
@@ -20,13 +21,11 @@ Named list with the provenance record for \code{dataset}. If no match is
 found, invisible NULL is returned and a warning is issued.
 }
 \description{
-Reads the package VERSIONS.yaml (installed extdata) and returns the provenance
+Reads VERSIONS.yaml (installed extdata) and returns the provenance
 record for a single dataset as a named list. If the dataset was produced from
 multiple sources the returned list preserves the \code{sources} sub-list and
 includes combination metadata when present.
 }
 \examples{
-# From installed package:
 # codemetadata("icd10")
-
 }

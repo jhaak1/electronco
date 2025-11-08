@@ -1,19 +1,18 @@
-#' Retrieve full provenance for a packaged code list (ICD9, ICD10, CPT).
+#' Retrieve full provenance for a packaged code list (ICD9, ICD10, or CPT).
 #'
-#' Reads the package VERSIONS.yaml (installed extdata) and returns the provenance
+#' Reads VERSIONS.yaml (installed extdata) and returns the provenance
 #' record for a single dataset as a named list. If the dataset was produced from
 #' multiple sources the returned list preserves the `sources` sub-list and
 #' includes combination metadata when present.
 #'
-#' @param dataset Character. The dataset name to look up (e.g. "icd10").
+#' @param dataset Character. The dataset name to look up.  This can be one of 3
+#' possibilities: 'icd9', 'icd10', or 'cpt'.
 #' @param file Character. Path to VERSIONS.yaml. Defaults to the installed package:
 #'        system.file("extdata", "VERSIONS.yaml", package = "electronco").
 #' @return Named list with the provenance record for `dataset`. If no match is
 #'         found, invisible NULL is returned and a warning is issued.
 #' @examples
-#' # From installed package:
 #' # codemetadata("icd10")
-#'
 codemetadata <- function(dataset, file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
   if (missing(dataset) || !nzchar(dataset)) stop("`dataset` must be supplied as a non-empty string.")
   if (!nzchar(file)) stop("VERSIONS.yaml not found in installed package. Supply `file` argument.")
