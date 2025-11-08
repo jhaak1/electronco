@@ -23,9 +23,9 @@ found, invisible NULL is returned and a warning is issued.
 \description{
 Reads VERSIONS.yaml (installed extdata) and returns the provenance
 record for a single dataset as a named list. If the dataset was produced from
-multiple sources the returned list preserves the \code{sources} sub-list and
+multiple sources, the returned list preserves the \code{sources} sub-list and
 includes combination metadata when present.
 }
 \examples{
-# codemetadata("icd10")
+codemetadata("icd10")
 }
