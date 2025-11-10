@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnosis.R
 \name{diagnosis}
 \alias{diagnosis}
-\title{Extract diagnosis phenotype from diagnosis rows (dplyr style)}
+\title{Extract diagnosis phenotype from diagnosis rows.}
 \usage{
 diagnosis(
   diagnoses,
@@ -11,10 +11,8 @@ diagnosis(
     min_occurrences = 1, ),
   patient_id_col = "patient_id",
   code_col = "code",
-  system_col = "code_system",
-  date_col = "date",
-  source_col = "source",
-  encounter_col = "encounter_id"
+  system_col = "code_type",
+  date_col = "diagnosis_date"
 )
 }
 \description{
@@ -26,5 +24,5 @@ Inputs:
 }
 }
 \details{
-Output: list(patient_level, evidence, metadata)
+Output: list(patient_level, evidence, metadata).
 }
