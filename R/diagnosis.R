@@ -1,0 +1,140 @@
+library(dplyr)
+library(lubridate)
+library(rlang)
+
+#' Extract diagnosis phenotype from diagnosis rows (dplyr style)
+#'
+#' Inputs:
+#'  - diagnoses: tibble with the following columns: patient_id, code, code_system, date (Date).
+#'  - concept_set: tibble with the following columns: code, code_system, include (logical TRUE=include, FALSE=exclude).
+#'  - params: list(lookback_start, lookback_end, min_occurrences)
+#'
+#' Output: list(patient_level, evidence, metadata)
+diagnosis <- function(diagnoses,
+                                    concept_set,
+                                    params = list(
+                                      lookback_start = as.Date("1900-01-01"),
+                                      lookback_end   = Sys.Date(),
+                                      min_occurrences = 1,
+                                    ),
+                                    patient_id_col = "patient_id",
+                                    code_col = "code",
+                                    system_col = "code_system",
+                                    date_col = "date",
+                                    source_col = "source",
+                                    encounter_col = "encounter_id") {
+
+  # Standardize column names for internal use
+  diag <- diagnoses %>%
+    rename(
+      .patient_id = !!sym(patient_id_col),
+      .code = !!sym(code_col),
+      .system = !!sym(system_col),
+      .date = !!sym(date_col),
+      .is_inpatient = !!sym(inpatient_col),
+      .source = !!sym(source_col),
+      .encounter_id = !!sym(encounter_col)
+    ) %>%
+    mutate(
+      .code = toupper(gsub("\\.", "", as.character(.code))),
+      .system = toupper(as.character(.system)),
+      .date = as_date(.date)
+    )
+
+  cs <- concept_set %>%
+    mutate(
+      .code = toupper(gsub("\\.", "", as.character(code))),
+      .system = toupper(as.character(code_system)),
+      .include = as.logical(include)
+    ) %>%
+    select(.code, .system, .include)
+
+  # Join to label each diagnosis row as include/exclude/nomatch
+  evidence <- diag %>%
+    left_join(cs, by = c(".code" = ".code", ".system" = ".system")) %>%
+    mutate(
+      .match = case_when(
+        .include == TRUE ~ "include",
+        .include == FALSE ~ "exclude",
+        TRUE ~ "nomatch"
+      )
+    )
+
+  # Filter to lookback window
+  evidence_window <- evidence %>%
+    filter(.date >= params$lookback_start, .date <= params$lookback_end)
+
+  # Resolve exclusions at encounter level: if any exclusion code in same encounter -> mark row excluded
+  evidence_window <- evidence_window %>%
+    group_by(.patient_id, .encounter_id) %>%
+    mutate(
+      .encounter_has_exclusion = any(.match == "exclude", na.rm = TRUE)
+    ) %>%
+    ungroup() %>%
+    mutate(.effective_match = if_else(.encounter_has_exclusion & .match == "include", "excluded_by_encounter", .match))
+
+  # Keep only include evidence (not excluded_by_encounter)
+  evidence_keep <- evidence_window %>%
+    filter(.effective_match == "include") %>%
+    arrange(.patient_id, .date)
+
+  # Collapse duplicates per patient+date+code+encounter and compute counts
+  evidence_collapsed <- evidence_keep %>%
+    distinct(.patient_id, .code, .system, .date, .encounter_id, .source, .is_inpatient) %>%
+    group_by(.patient_id) %>%
+    mutate(
+      evidence_id = row_number()
+    ) %>%
+    ungroup()
+
+  # Determine patient-level flag according to rules
+  patient_flags <- evidence_collapsed %>%
+    group_by(.patient_id) %>%
+    summarise(
+      n_total = n(),
+      n_inpatient = sum(.is_inpatient, na.rm = TRUE),
+      first_date = min(.date, na.rm = TRUE),
+      last_date = max(.date, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      meets_min_occurrence = n_total >= params$min_occurrences,
+      meets_inpatient = if_else(params$require_inpatient, n_inpatient >= 1, TRUE),
+      diagnosis_flag = meets_min_occurrence & meets_inpatient
+    )
+
+  # Include patients with zero matches as FALSE
+  all_patients <- diagnoses %>%
+    distinct(!!sym(patient_id_col)) %>%
+    rename(.patient_id = !!sym(patient_id_col))
+
+  patient_level <- all_patients %>%
+    left_join(patient_flags, by = ".patient_id") %>%
+    mutate(
+      n_total = replace_na(n_total, 0),
+      n_inpatient = replace_na(n_inpatient, 0),
+      first_date = as_date(first_date),
+      last_date = as_date(last_date),
+      diagnosis_flag = replace_na(diagnosis_flag, FALSE)
+    )
+
+  metadata <- list(
+    params = params,
+    concept_set_used = cs,
+    extraction_time = Sys.time(),
+    source_counts = evidence_collapsed %>% count(.source, name = "rows")
+  )
+
+  # Return evidence rows (with canonical flag for first date)
+  evidence_out <- evidence_collapsed %>%
+    left_join(patient_flags %>% select(.patient_id, first_date), by = ".patient_id") %>%
+    mutate(is_canonical = (.date == first_date)) %>%
+    select(.patient_id, .code, .system, .date, .encounter_id, .source, .is_inpatient, is_canonical)
+
+  list(
+    patient_level = patient_level,
+    evidence = evidence_out,
+    metadata = metadata
+  )
+}
+

@@ -13,3 +13,4 @@ Depends:
 Imports: 
     tibble,
     yaml
+LazyData: true
