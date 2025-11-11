@@ -26,7 +26,9 @@ diagnosis(
 
 \item{code_col}{Name of the code column in the "diagnoses" dataset.}
 
-\item{date_col}{Name of the date column (date of diagnosis) in the "diagnoses" dataset.}
+\item{system_col}{Name of the code_type column in the "diagnoses" dataset.}
+
+\item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
 }
 \description{
 Inputs:

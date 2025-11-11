@@ -15,7 +15,8 @@ library(rlang)
 #' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
-#' @param date_col Name of the date column (date of diagnosis) in the "diagnoses" dataset.
+#' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
+#' @param system_col Name of the code_type column in the "diagnoses" dataset.
 diagnosis <- function(diagnoses,
                                     concept_set,
                                     params = list(
