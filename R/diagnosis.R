@@ -73,26 +73,17 @@ diagnosis <- function(diagnoses,
         T ~ "nomatch"
       )
     )
-######################################################################################
-  # are lookback values Dates and sensible?
-  str(lookback_start); str(lookback_end)
-  print(lookback_start); print(lookback_end)
 
-  # do the input rows have parsed dates?
-  message("diag date summary:"); print(summary(diag$.date))
-  message("count missing diag dates: ", sum(is.na(diag$.date)))
-
-  # how many matches before/after windowing?
-  message("evidence rows before window: ", nrow(evidence))
-  message("evidence rows after window: ", nrow(evidence_window))
-  # rows removed by the window (if any)
-  removed_by_window <- evidence %>% filter(is.na(.date) | .date < lookback_start | .date > lookback_end)
-  message("rows removed by window: ", nrow(removed_by_window))
-
-########################################################################################
   # Filter to lookback window.
   evidence_window <- evidence %>%
     filter(.date >= lookback_start, .date <= lookback_end)
+
+  ##################################################################################
+  # right after building evidence_window inside function
+  message("evidence rows after window: ", nrow(evidence_window))
+  stop("temporary stop for debugging")
+
+#####################################################################################
 
   # Resolve exclusions at encounter level: if any exclusion code in same encounter, then mark row excluded.
   evidence_window <- evidence_window %>%
