@@ -2,7 +2,7 @@
 #'
 #' A data frame of diagnosis codes used to identify breast cancer in EHRs.
 #'
-#' @format A data frame with \code{n} rows and the following columns:
+#' @format A data frame with 67 rows and the following columns:
 #' \describe{
 #'   \item{code}{character. code string.}
 #'   \item{code_system}{character. vocabulary name (e.g., "icd10").}
