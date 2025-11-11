@@ -29,21 +29,32 @@ diagnosis <- function(diagnoses,
   lookback_start = as.Date(lookback_start, '%Y-%m-%d')
   lookback_end = as.Date(lookback_end, '%Y-%m-%d')
 
-  # Convert code_col and system to uppercase and date_col to a date object.
+  # validate input columns early
+  required <- c(patient_id_col, code_col, system, date_col)
+  missing_cols <- setdiff(required, names(diagnoses))
+  if (length(missing_cols) > 0L) {
+    stop("diagnoses is missing columns: ", paste(missing_cols, collapse = ", "))
+  }
+
+  # normalize types and values using programmatic column selection
   diagnoses <- diagnoses %>%
     dplyr::mutate(
+      # ensure patient id string
+      dplyr::across(dplyr::all_of(patient_id_col), as.character),
+      # uppercase code and system columns (operate on the actual columns named by the params)
       dplyr::across(dplyr::all_of(code_col), ~ toupper(.x)),
-      dplyr::across(dplyr::all_of(system), ~ toupper(.x)),
-      dplyr::across(dplyr::all_of(date_col), ~ as.Date(.x, "%Y-%m-%d"))
+      dplyr::across(dplyr::all_of(system),   ~ toupper(.x)),
+      # parse date column into Date
+      dplyr::across(dplyr::all_of(date_col), ~ as.Date(.x, format = "%Y-%m-%d"))
     )
 
-  # Standardize input columns.
+  # canonicalize names to patient_id / code / system / date for downstream code
   diag <- diagnoses %>%
     dplyr::rename(
       patient_id = dplyr::all_of(patient_id_col),
-      code = dplyr::all_of(code_col),
-      system = dplyr::all_of(system),
-      date = dplyr::all_of(date_col)
+      code       = dplyr::all_of(code_col),
+      system     = dplyr::all_of(system),
+      date       = dplyr::all_of(date_col)
     )
 
   # Get concept set.
@@ -120,8 +131,9 @@ diagnosis <- function(diagnoses,
     dplyr::mutate(
       n_total = tidyr::replace_na(n_total, 0L),
       first_date = lubridate::as_date(first_date),
-      last_date = lubridate::as_date(last_date),
-      diagnosis_flag = tidyr::replace_na(diagnosis_flag, FALSE)
+      last_date  = lubridate::as_date(last_date),
+      meets_min_event = tidyr::replace_na(meets_min_event, FALSE),
+      diagnosis_flag  = tidyr::replace_na(diagnosis_flag, FALSE)
     )
 
   # Metadata
