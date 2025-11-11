@@ -8,7 +8,7 @@
 #' Output: list(patient_level, evidence, metadata).
 #' @param diagnoses Dataset imported from a database or csv file.
 #' @param concept Concept to look for.  For breast cancer, specify 'bc'.
-#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)
+#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences).
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
@@ -48,6 +48,7 @@ diagnosis <- function(diagnoses,
     concept_set = bc_diag_concept
   } else {
     print('Warning: concept not recognized.')
+    concept_set = NULL
   }
 
   cs <- concept_set %>%
@@ -75,7 +76,7 @@ diagnosis <- function(diagnoses,
 
   # Resolve exclusions at encounter level: if any exclusion code in same encounter, then mark row excluded.
   evidence_window <- evidence_window %>%
-    group_by(.patient_id, .encounter_id) %>%
+    group_by(.patient_id) %>%
     mutate(
       .encounter_has_exclusion = any(.match == "exclude", na.rm = TRUE)
     ) %>%

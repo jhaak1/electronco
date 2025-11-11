@@ -20,7 +20,7 @@ diagnosis(
 
 \item{concept}{Concept to look for.  For breast cancer, specify 'bc'.}
 
-\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)}
+\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences).}
 
 \item{patient_id_col}{Name of the patient_id column in the "diagnoses" dataset.}
 
