@@ -57,6 +57,11 @@ diagnosis <- function(diagnoses,
       date       = dplyr::all_of(date_col)
     )
 
+  diag <- diag %>%
+    mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+
+
+
   # Get concept set.
   if(concept == 'bc'){
     concept_set = bc_diag_concept
@@ -64,6 +69,9 @@ diagnosis <- function(diagnoses,
     print('Warning: concept not recognized.')
     concept_set = NULL
     }
+
+  concept_set <- concept_set %>%
+    mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
   # Join diagnoses with concept set.
   evidence <- diag %>%
