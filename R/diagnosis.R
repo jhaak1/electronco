@@ -94,11 +94,22 @@ diagnosis <- function(diagnoses,
     stop("Unknown concept: ", as.character(concept))
   }
 
-  # normalize helpers
-  normalize_code <- function(x) toupper(gsub("\\.", "", trimws(as.character(x))))
-  normalize_system <- function(x) toupper(trimws(as.character(x)))
+  # --- normalize helpers ------------------------------------------------------------
+  normalize_code <- function(x) {
+    # remove leading/trailing whitespace, Unicode zero-width spaces, and dots; uppercase
+    x <- as.character(x)
+    x <- gsub("\u200B|\uFEFF", "", x, perl = TRUE) # remove zero-width chars if present
+    x <- trimws(x)
+    x <- gsub("\\.", "", x)
+    toupper(x)
+  }
+  normalize_system <- function(x) {
+    x <- as.character(x)
+    x <- gsub("\u200B|\uFEFF", "", x, perl = TRUE)
+    toupper(trimws(x))
+  }
 
-  # normalize concept set (cs) and create a no-dot code column for matching
+  # --- build normalized concept set --------------------------------------------------
   cs <- concept_set %>%
     dplyr::mutate(
       .code = normalize_code(code),
@@ -108,7 +119,7 @@ diagnosis <- function(diagnoses,
     dplyr::select(.code, .system, .include) %>%
     dplyr::distinct()
 
-  # ensure diag uses the exact same normalization
+  # --- normalize diag consistently ---------------------------------------------------
   diag <- diag %>%
     dplyr::mutate(
       .code = normalize_code(.code),
@@ -116,7 +127,7 @@ diagnosis <- function(diagnoses,
       .date = lubridate::as_date(.date)
     )
 
-  # join and label matches
+  # --- join and label ---------------------------------------------------------------
   evidence <- diag %>%
     dplyr::left_join(cs, by = c(".code", ".system")) %>%
     dplyr::mutate(
@@ -126,6 +137,21 @@ diagnosis <- function(diagnoses,
         TRUE               ~ "nomatch"
       )
     )
+
+  # --- diagnostic: show which window codes still fail to match ----------------------
+  window_codes <- evidence %>%
+    dplyr::filter(.date >= lookback_start, .date <= lookback_end) %>%
+    dplyr::select(.code, .system) %>%
+    dplyr::distinct()
+
+  # show membership against cs for quick inspect (prints small df)
+  diag_mismatch_check <- window_codes %>%
+    dplyr::left_join(cs, by = c(".code", ".system")) %>%
+    dplyr::mutate(match_exists = !is.na(.include))
+
+  print(as.data.frame(diag_mismatch_check))
+  # if any match_exists == FALSE you have remaining nonmatches to inspect
+
 
 
   # -- filter to lookback window ----------------------------------------------------
