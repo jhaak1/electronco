@@ -29,11 +29,10 @@ diagnosis <- function(diagnoses,
   lookback_start = as.Date(lookback_start, '%Y-%m-%d')
   lookback_end = as.Date(lookback_end, '%Y-%m-%d')
 
-  # Convert code and system to uppercase and date to a date object.
+  # Convert code and system to uppercase.
   diagnoses = diagnoses %>%
     mutate(code_col = toupper(code_col),
-           system = toupper(system),
-           date = as.Date(date))
+           system = toupper(system))
 
   # Standardize input columns.
   diag <- diagnoses %>%
