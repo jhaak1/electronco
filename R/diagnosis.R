@@ -7,7 +7,7 @@
 #'
 #' Output: list(patient_level, evidence, metadata).
 #' @param diagnoses Dataset imported from a database or csv file.
-#' @param concept_set Path to concept_set.
+#' @param concept Concept to look for.  For breast cancer, specify 'bc'.
 #' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
@@ -18,7 +18,7 @@
 #' @importFrom lubridate as_date
 #' @importFrom rlang sym
 diagnosis <- function(diagnoses,
-                                    concept_set,
+                                    concept,
                                     params = list(
                                       lookback_start = as.Date("1900-01-01"),
                                       lookback_end   = Sys.Date(),
@@ -42,6 +42,13 @@ diagnosis <- function(diagnoses,
       .system = toupper(as.character(.system)),
       .date = as_date(.date)
     )
+
+  # Get applicable concept set.
+  if(concept == 'bc'){
+    concept_set = bc_diag_concept
+  } else {
+    print('Warning: concept not recognized.')
+  }
 
   cs <- concept_set %>%
     mutate(
