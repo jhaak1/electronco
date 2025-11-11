@@ -17,6 +17,52 @@
 #' @importFrom dplyr rename mutate left_join filter group_by ungroup arrange distinct summarise select count
 #' @importFrom lubridate as_date
 #' @importFrom rlang sym
+# Internal helper: coerce common inputs to Date
+.parse_to_date <- function(x, name = "date") {
+  if (is.null(x)) return(NA_Date_)
+  if (inherits(x, "Date")) return(x)
+  if (inherits(x, "POSIXt")) return(as.Date(x))
+
+  # character: try ISO formats first, then try lubridate ymd/ymd_hms if available
+  if (is.character(x)) {
+    # trim whitespace
+    x2 <- trimws(x)
+    # try fast ISO parse
+    iso_try <- try(as.Date(x2), silent = TRUE)
+    if (!inherits(iso_try, "try-error") && !any(is.na(iso_try))) return(iso_try)
+
+    # try common flexible formats via lubridate if available
+    if (requireNamespace("lubridate", quietly = TRUE)) {
+      lub_try <- try(lubridate::ymd(x2), silent = TRUE)
+      if (!inherits(lub_try, "try-error") && !all(is.na(lub_try))) return(as.Date(lub_try))
+      lub_try2 <- try(lubridate::ymd_hms(x2), silent = TRUE)
+      if (!inherits(lub_try2, "try-error") && !all(is.na(lub_try2))) return(as.Date(lub_try2))
+    }
+
+    # fall through to NA
+    warning(sprintf("Unable to parse %s string to Date: %s", name, paste(head(x2, 3), collapse = ", ")), call. = FALSE)
+    return(as.Date(NA))
+  }
+
+  # numeric: treat common cases
+  if (is.numeric(x)) {
+    # If single large integer like 20230101 assume yyyyMMdd
+    if (all(x > 1e6)) {
+      parsed <- try(as.Date(as.character(x), format = "%Y%m%d"), silent = TRUE)
+      if (!inherits(parsed, "try-error") && !all(is.na(parsed))) return(parsed)
+    }
+    # If small integers (days since epoch) use as.Date
+    parsed2 <- try(as.Date(x, origin = "1970-01-01"), silent = TRUE)
+    if (!inherits(parsed2, "try-error") && !all(is.na(parsed2))) return(parsed2)
+
+    warning(sprintf("Unable to coerce numeric %s to Date; returning NA", name), call. = FALSE)
+    return(as.Date(NA))
+  }
+
+  warning(sprintf("Unsupported type for %s; returning NA", name), call. = FALSE)
+  as.Date(NA)
+}
+
 diagnosis <- function(diagnoses,
                                     concept,
                                     params = list(
