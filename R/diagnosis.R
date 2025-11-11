@@ -118,11 +118,11 @@ diagnosis <- function(diagnoses,
     dplyr::filter(.date >= lookback_start, .date <= lookback_end)
 
   ####################################################################################
-  # show counts by match and show the 4 rows
   evidence_window %>% dplyr::count(.match, .include, .system, .code, sort = TRUE)
-  evidence_window %>%
-    dplyr::select(.patient_id, .date, .code, .system, .include, .match) %>%
-    tibble::print(evidence_window, n = Inf)
+
+  # print the full evidence_window using base-friendly print
+  print(as.data.frame(evidence_window[, c(".patient_id", ".date", ".code", ".system", ".include", ".match")]))
+
   ####################################################################################
 
   # -- SKIP encounter-level exclusion (no encounter data available) -----------------
