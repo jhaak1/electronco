@@ -29,13 +29,19 @@ diagnosis <- function(diagnoses,
   lookback_start = as.Date(lookback_start, '%Y-%m-%d')
   lookback_end = as.Date(lookback_end, '%Y-%m-%d')
 
+  # Convert code and system to uppercase and date to a date object.
+  diagnoses = diagnoses %>%
+    mutate(code_col = toupper(code_col),
+           system = toupper(system),
+           date = as.Date(date))
+
   # Standardize input columns.
   diag <- diagnoses %>%
     dplyr::rename(
       patient_id = patient_id_col,
-      code = toupper(code_col),
-      system = toupper(system),
-      date = as.Date(date_col))
+      code = code_col,
+      system = system,
+      date = date_col)
 
   # Get concept set.
   if(concept == 'bc'){
