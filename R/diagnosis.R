@@ -122,7 +122,7 @@ diagnosis <- function(diagnoses,
   evidence_window %>% dplyr::count(.match, .include, .system, .code, sort = TRUE)
   evidence_window %>%
     dplyr::select(.patient_id, .date, .code, .system, .include, .match) %>%
-    print(n = Inf)
+    tibble::print(evidence_window, n = Inf)
   ####################################################################################
 
   # -- SKIP encounter-level exclusion (no encounter data available) -----------------
