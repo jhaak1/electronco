@@ -9,8 +9,8 @@
 #' @param concept Concept to look for.  For breast cancer, specify 'bc'.
 #' @param lookback_start Beginning date of date range to look at, in the format YYYY-MM-DD (year-month-day).
 #' @param lookback_end End data of date range to look at, in the format YYYY-MM-DD (year-month-day).
-#' @param min_occurences The minimum number of occurences of a given concept.
-#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences).
+#' @param min_events The minimum number of occurences of a given concept.
+#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_events).
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
@@ -24,7 +24,7 @@ diagnosis <- function(diagnoses,
                       concept,
                       lookback_start,
                       lookback_end,
-                      min_occurrences,
+                      min_events,
                       patient_id_col = "patient_id",
                       code_col = "code",
                       system_col = "code_type",
@@ -112,8 +112,8 @@ diagnosis <- function(diagnoses,
       .groups = "drop"
     ) %>%
     mutate(
-      meets_min_occurrence = n_total >= min_occurrences,
-      diagnosis_flag = meets_min_occurrence
+      meets_min_event = n_total >= min_events,
+      diagnosis_flag = meets_min_event
     )
 
   # Include patients with zero matches as FALSE.

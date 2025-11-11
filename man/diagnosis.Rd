@@ -9,7 +9,7 @@ diagnosis(
   concept,
   lookback_start,
   lookback_end,
-  min_occurrences,
+  min_events,
   patient_id_col = "patient_id",
   code_col = "code",
   system_col = "code_type",
@@ -25,6 +25,8 @@ diagnosis(
 
 \item{lookback_end}{End data of date range to look at, in the format YYYY-MM-DD (year-month-day).}
 
+\item{min_events}{The minimum number of occurences of a given concept.}
+
 \item{patient_id_col}{Name of the patient_id column in the "diagnoses" dataset.}
 
 \item{code_col}{Name of the code column in the "diagnoses" dataset.}
@@ -33,9 +35,7 @@ diagnosis(
 
 \item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
 
-\item{min_occurences}{The minimum number of occurences of a given concept.}
-
-\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences).}
+\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_events).}
 }
 \description{
 Inputs:
