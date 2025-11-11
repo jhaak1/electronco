@@ -17,6 +17,7 @@
 #' @importFrom dplyr rename mutate left_join filter group_by ungroup arrange distinct summarise select count
 #' @importFrom lubridate as_date
 #' @importFrom rlang sym
+#' @importFrom tidyr replace_na
 # Internal helper: coerce common inputs to Date
 .parse_to_date <- function(x, name = "date") {
   if (is.null(x)) return(NA_Date_)
