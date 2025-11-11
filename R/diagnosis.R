@@ -32,6 +32,7 @@ diagnosis <- function(diagnoses,
   # Convert lookback_start and lookback_end to dates.
   lookback_start = as.Date(lookback_start, '%Y-%m-%d')
   lookback_end = as.Date(lookback_end, '%Y-%m-%d')
+  if (is.na(lookback_start) || is.na(lookback_end)) stop("lookback_start / lookback_end must be coercible to Date")
 
   # Standardize column names for internal use.
   diag <- diagnoses %>%
