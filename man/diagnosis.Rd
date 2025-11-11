@@ -6,7 +6,7 @@
 \usage{
 diagnosis(
   diagnoses,
-  concept_set,
+  concept,
   params = list(lookback_start = as.Date("1900-01-01"), lookback_end = Sys.Date(),
     min_occurrences = 1, ),
   patient_id_col = "patient_id",
@@ -18,7 +18,7 @@ diagnosis(
 \arguments{
 \item{diagnoses}{Dataset imported from a database or csv file.}
 
-\item{concept_set}{Path to concept_set.}
+\item{concept}{Concept to look for.  For breast cancer, specify 'bc'.}
 
 \item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)}
 
