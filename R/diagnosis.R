@@ -94,17 +94,31 @@ diagnosis <- function(diagnoses,
     stop("Unknown concept: ", as.character(concept))
   }
 
+  # normalize helpers
+  normalize_code <- function(x) toupper(gsub("\\.", "", trimws(as.character(x))))
+  normalize_system <- function(x) toupper(trimws(as.character(x)))
+
+  # normalize concept set (cs) and create a no-dot code column for matching
   cs <- concept_set %>%
     dplyr::mutate(
-      .code = toupper(gsub("\\.", "", as.character(code))),
-      .system = toupper(as.character(code_system)),
+      .code = normalize_code(code),
+      .system = normalize_system(code_system),
       .include = as.logical(include)
     ) %>%
-    dplyr::select(.code, .system, .include)
+    dplyr::select(.code, .system, .include) %>%
+    dplyr::distinct()
 
-  # -- label evidence (include/exclude/nomatch) ------------------------------------
+  # ensure diag uses the exact same normalization
+  diag <- diag %>%
+    dplyr::mutate(
+      .code = normalize_code(.code),
+      .system = normalize_system(.system),
+      .date = lubridate::as_date(.date)
+    )
+
+  # join and label matches
   evidence <- diag %>%
-    dplyr::left_join(cs, by = c(".code" = ".code", ".system" = ".system")) %>%
+    dplyr::left_join(cs, by = c(".code", ".system")) %>%
     dplyr::mutate(
       .match = dplyr::case_when(
         .include == TRUE  ~ "include",
@@ -113,22 +127,12 @@ diagnosis <- function(diagnoses,
       )
     )
 
+
   # -- filter to lookback window ----------------------------------------------------
   evidence_window <- evidence %>%
     dplyr::filter(.date >= lookback_start, .date <= lookback_end)
 
-  ####################################################################################
-  # distinct codes from window
-  window_codes <- evidence_window %>% dplyr::select(.code, .system) %>% dplyr::distinct()
-  print(as.data.frame(window_codes))
 
-  # check membership in cs (shows .include when match exists)
-  joined <- window_codes %>%
-    dplyr::left_join(cs, by = c(".code", ".system"))
-  print(as.data.frame(joined))
-
-
-  ####################################################################################
 
   # -- SKIP encounter-level exclusion (no encounter data available) -----------------
   # Keep rows whose effective match is "include" only; do not apply encounter-level exclusion.
