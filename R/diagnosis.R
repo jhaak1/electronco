@@ -34,7 +34,7 @@ diagnosis <- function(diagnoses,
     dplyr::rename(
       patient_id = patient_id_col,
       code = code_col,
-      system = system_col,
+      system = system,
       date = date_col)
 
   # Get concept set.
