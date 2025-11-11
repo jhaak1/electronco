@@ -15,6 +15,19 @@ diagnosis(
   date_col = "diagnosis_date"
 )
 }
+\arguments{
+\item{diagnoses}{Dataset imported from a database or csv file.}
+
+\item{concept_set}{Path to concept_set.}
+
+\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)}
+
+\item{patient_id_col}{Name of the patient_id column in the "diagnoses" dataset.}
+
+\item{code_col}{Name of the code column in the "diagnoses" dataset.}
+
+\item{date_col}{Name of the date column (date of diagnosis) in the "diagnoses" dataset.}
+}
 \description{
 Inputs:
 \itemize{

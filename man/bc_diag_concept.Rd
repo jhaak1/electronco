@@ -5,7 +5,7 @@
 \alias{bc_diag_concept}
 \title{Breast Cancer Diagnosis Concept Set.}
 \format{
-A data frame with \code{n} rows and the following columns:
+A data frame with 67 rows and the following columns:
 \describe{
 \item{code}{character. code string.}
 \item{code_system}{character. vocabulary name (e.g., "icd10").}

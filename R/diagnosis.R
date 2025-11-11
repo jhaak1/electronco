@@ -10,6 +10,12 @@ library(rlang)
 #'  - params: list(lookback_start, lookback_end, min_occurrences)
 #'
 #' Output: list(patient_level, evidence, metadata).
+#' @param diagnoses Dataset imported from a database or csv file.
+#' @param concept_set Path to concept_set.
+#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_occurences)
+#' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
+#' @param code_col Name of the code column in the "diagnoses" dataset.
+#' @param date_col Name of the date column (date of diagnosis) in the "diagnoses" dataset.
 diagnosis <- function(diagnoses,
                                     concept_set,
                                     params = list(
