@@ -27,32 +27,33 @@ diagnosis <- function(diagnoses,
                       patient_id_col = "patient_id",
                       code_col = "code",
                       system_col = "code_type",
-                      date_col = "diagnosis_date") {
+                      date_col = "diagnosis_date",
+                      debug = FALSE) {
 
   # Convert lookback_start and lookback_end to dates.
-  lookback_start = as.Date(lookback_start, '%Y-%m-%d')
-  lookback_end = as.Date(lookback_end, '%Y-%m-%d')
+  lookback_start <- as.Date(lookback_start, '%Y-%m-%d')
+  lookback_end   <- as.Date(lookback_end, '%Y-%m-%d')
 
   # Standardize column names for internal use.
   diag <- diagnoses %>%
     rename(
-      .patient_id = !!sym(patient_id_col),
-      .code = !!sym(code_col),
-      .system = !!sym(system_col),
-      .date = !!sym(date_col),
+      .patient_id = !!rlang::sym(patient_id_col),
+      .code = !!rlang::sym(code_col),
+      .system = !!rlang::sym(system_col),
+      .date = !!rlang::sym(date_col)
     ) %>%
     mutate(
       .code = toupper(gsub("\\.", "", as.character(.code))),
       .system = toupper(as.character(.system)),
-      .date = as_date(.date)
+      .date = lubridate::as_date(.date)
     )
 
   # Get applicable concept set.
-  if(concept == 'bc'){
-    concept_set = bc_diag_concept
+  if (identical(concept, "bc")) {
+    concept_set <- bc_diag_concept
   } else {
-    print('Warning: concept not recognized.')
-    concept_set = NULL
+    warning("concept not recognized; concept_set set to NULL")
+    concept_set <- NULL
   }
 
   cs <- concept_set %>%
@@ -61,29 +62,34 @@ diagnosis <- function(diagnoses,
       .system = toupper(as.character(code_system)),
       .include = as.logical(include)
     ) %>%
-    select(.code, .system, .include)
+    dplyr::select(.code, .system, .include)
 
   # Join to label each diagnosis row as include, exclude, or nomatch.
   evidence <- diag %>%
-    left_join(cs, by = c(".code" = ".code", ".system" = ".system")) %>%
-    mutate(
-      .match = case_when(
-        .include == T ~ "include",
-        .include == F ~ "exclude",
-        T ~ "nomatch"
+    dplyr::left_join(cs, by = c(".code" = ".code", ".system" = ".system")) %>%
+    dplyr::mutate(
+      .match = dplyr::case_when(
+        .include == TRUE  ~ "include",
+        .include == FALSE ~ "exclude",
+        TRUE              ~ "nomatch"
       )
     )
 
   # Filter to lookback window.
   evidence_window <- evidence %>%
-    filter(.date >= lookback_start, .date <= lookback_end)
+    dplyr::filter(.date >= lookback_start, .date <= lookback_end)
 
-  ##################################################################################
-  # right after building evidence_window inside function
-  message("evidence rows after window: ", nrow(evidence_window))
-  stop("temporary stop for debugging")
+  # If debug requested, return intermediates for inspection (no side effects)
+  if (isTRUE(debug)) {
+    return(list(
+      diag = diag,
+      evidence = evidence,
+      evidence_window = evidence_window
+    ))
+  }
 
-#####################################################################################
+  # ... rest of function follows ...
+
 
   # Resolve exclusions at encounter level: if any exclusion code in same encounter, then mark row excluded.
   evidence_window <- evidence_window %>%

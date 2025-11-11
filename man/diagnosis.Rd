@@ -13,7 +13,8 @@ diagnosis(
   patient_id_col = "patient_id",
   code_col = "code",
   system_col = "code_type",
-  date_col = "diagnosis_date"
+  date_col = "diagnosis_date",
+  debug = FALSE
 )
 }
 \arguments{
