@@ -33,7 +33,7 @@ diagnosis <- function(diagnoses,
   diagnoses = diagnoses %>%
     mutate(code_col = toupper(code_col),
            system = toupper(system),
-           date_col = as.Date(date_col))
+           date_col = as.Date(date_col, '%Y-%m-%d'))
 
   # Standardize input columns.
   diag <- diagnoses %>%
