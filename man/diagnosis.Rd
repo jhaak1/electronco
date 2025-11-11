@@ -9,24 +9,23 @@ diagnosis(
   concept,
   lookback_start,
   lookback_end,
-  min_events,
+  min_events = 1,
   patient_id_col = "patient_id",
   code_col = "code",
   system_col = "code_type",
-  date_col = "diagnosis_date",
-  debug = FALSE
+  date_col = "diagnosis_date"
 )
 }
 \arguments{
 \item{diagnoses}{Dataset imported from a database or csv file.}
 
-\item{concept}{Concept to look for.  For breast cancer, specify 'bc'.}
+\item{concept}{Concept to look for. For breast cancer, specify 'bc'.}
 
-\item{lookback_start}{Beginning date of date range to look at, in the format YYYY-MM-DD (year-month-day).}
+\item{lookback_start}{Beginning date of date range to look at (Date or coercible string).}
 
-\item{lookback_end}{End data of date range to look at, in the format YYYY-MM-DD (year-month-day).}
+\item{lookback_end}{End date of date range to look at (Date or coercible string).}
 
-\item{min_events}{The minimum number of occurences of a given concept.}
+\item{min_events}{The minimum number of occurrences of a given concept.}
 
 \item{patient_id_col}{Name of the patient_id column in the "diagnoses" dataset.}
 
