@@ -92,7 +92,7 @@ diagnosis <- function(diagnoses,
     filter(.effective_match == "include") %>%
     arrange(.patient_id, .date)
 
-  # Collapse duplicates per patient+date+code+encounter and compute counts.
+  # Collapse duplicates per patient+date+code and compute counts.
   evidence_collapsed <- evidence_keep %>%
     distinct(.patient_id, .code, .system, .date) %>%
     group_by(.patient_id) %>%
