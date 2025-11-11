@@ -99,8 +99,8 @@ diagnosis <- function(diagnoses,
 
   # Include patients with zero matches as FALSE.
   all_patients <- diagnoses %>%
-    dplyr::distinct(patient_id_col) %>%
-    dplyr::rename(patient_id = patient_id_col) %>%
+    dplyr::distinct(patient_id) %>%
+    dplyr::rename(patient_id = patient_id) %>%
     dplyr::mutate(patient_id = as.character(patient_id))
 
   patient_flags <- patient_flags %>%
