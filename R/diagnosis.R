@@ -75,6 +75,31 @@ diagnosis <- function(diagnoses,
                                     system_col = "code_type",
                                     date_col = "diagnosis_date") {
 
+  # Default Params
+  .default_params <- list(
+    lookback_start = as.Date("1900-01-01"),
+    lookback_end   = Sys.Date(),
+    min_occurrences = 1L
+  )
+
+  # Ensure params is a list.
+  if (!is.list(params)) params <- list(params)
+
+  # Allow positional (unnamed) list: map first three positions to names.
+  if (is.null(names(params)) || all(names(params) == "")) {
+    pos_names <- c("lookback_start", "lookback_end", "min_occurrences")
+    names(params)[seq_len(min(length(params), length(pos_names)))] <- pos_names[seq_len(min(length(params), length(pos_names)))]
+  }
+
+  # Merge with defaults so every field exists.
+  params <- modifyList(.default_params, params)
+
+  # Coerce and validate min_occurrences (ensure length 1 integer >= 1).
+  params$min_occurrences <- as.integer(params$min_occurrences)
+  if (length(params$min_occurrences) != 1 || is.na(params$min_occurrences) || params$min_occurrences < 1L) {
+    stop("params$min_occurrences must be a single integer >= 1")
+  }
+
   # Standardize column names for internal use.
   diag <- diagnoses %>%
     rename(
