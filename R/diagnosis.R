@@ -1,8 +1,8 @@
 #' Extract diagnosis phenotype from diagnosis rows.
 #'
 #' Inputs:
-#'  - diagnoses: tibble with the following columns: patient_id, code, code_system, date.
-#'  - concept_set: tibble with the following columns: code, code_system, include (logical TRUE=include, FALSE=exclude).
+#'  - diagnoses: tibble with the following columns: patient_id, code, code_type, date.
+#'  - concept_set: tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 #'
 #' Output: list(patient_level, evidence, metadata).
 #' @param diagnoses Dataset imported from a database or csv file.
@@ -12,7 +12,7 @@
 #' @param min_events The minimum number of occurrences of a given concept.
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
-#' @param system_col Name of the code_type column in the "diagnoses" dataset.
+#' @param system Name of the code_type column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
 #' @export
 diagnosis <- function(diagnoses,
@@ -22,7 +22,7 @@ diagnosis <- function(diagnoses,
                       min_events = 1,
                       patient_id_col = "patient_id",
                       code_col = "code",
-                      system_col = "code_type",
+                      system = "code_type",
                       date_col = "diagnosis_date") {
 
   # Convert lookback_start and lookback_end to date objects.
@@ -65,7 +65,7 @@ diagnosis <- function(diagnoses,
     dplyr::filter(match == "include") %>%
     dplyr::arrange(patient_id, date)
 
-  # Collapse duplicates based on patient+ date + code.
+  # Collapse duplicates based on patient + date + code.
   evidence_collapsed <- evidence_keep %>%
     dplyr::distinct(patient_id, code, system, date) %>%
     dplyr::group_by(patient_id) %>%

@@ -12,7 +12,7 @@ diagnosis(
   min_events = 1,
   patient_id_col = "patient_id",
   code_col = "code",
-  system_col = "code_type",
+  system = "code_type",
   date_col = "diagnosis_date"
 )
 }
@@ -31,15 +31,15 @@ diagnosis(
 
 \item{code_col}{Name of the code column in the "diagnoses" dataset.}
 
-\item{system_col}{Name of the code_type column in the "diagnoses" dataset.}
+\item{system}{Name of the code_type column in the "diagnoses" dataset.}
 
 \item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
 }
 \description{
 Inputs:
 \itemize{
-\item diagnoses: tibble with the following columns: patient_id, code, code_system, date.
-\item concept_set: tibble with the following columns: code, code_system, include (logical TRUE=include, FALSE=exclude).
+\item diagnoses: tibble with the following columns: patient_id, code, code_type, date.
+\item concept_set: tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 }
 }
 \details{
