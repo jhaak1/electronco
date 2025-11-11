@@ -9,7 +9,7 @@ diagnosis(
   concept,
   lookback_start,
   lookback_end,
-  min_occurrences = 1,
+  min_occurrences,
   patient_id_col = "patient_id",
   code_col = "code",
   system_col = "code_type",
