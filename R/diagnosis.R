@@ -15,7 +15,7 @@
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
 #' @param system_col Name of the code_type column in the "diagnoses" dataset.
 #' @export
-#' @importFrom dplyr rename mutate left_join filter group_by ungroup arrange distinct summarise select count
+#' @importFrom dplyr rename mutate left_join filter group_by ungroup arrange distinct summarize select count
 #' @importFrom lubridate as_date
 #' @importFrom rlang sym
 #' @importFrom tidyr replace_na
@@ -103,14 +103,14 @@ diagnosis <- function(diagnoses,
 
   # Determine patient-level flag according to rules.
   patient_flags <- evidence_collapsed %>%
-    group_by(.patient_id) %>%
-    summarise(
-      n_total = n(),
-      first_date = min(.date, na.rm = TRUE),
-      last_date = max(.date, na.rm = TRUE),
+    dplyr::group_by(.patient_id) %>%
+    dplyr::summarize(
+      n_total = dplyr::n(),
+      first_date = if (all(is.na(.date))) as.Date(NA) else min(.date, na.rm = TRUE),
+      last_date  = if (all(is.na(.date))) as.Date(NA) else max(.date, na.rm = TRUE),
       .groups = "drop"
     ) %>%
-    mutate(
+    dplyr::mutate(
       meets_min_event = n_total >= min_events,
       diagnosis_flag = meets_min_event
     )
