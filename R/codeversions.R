@@ -7,60 +7,72 @@
 #' @return tibble with the following columns: dataset, data_version, and retrieved.
 #' @examples
 #' codeversions()
+#' @export
+#' @importFrom yaml read_yaml
+#' @importFrom tibble as_tibble tibble
 codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
-  # lazy-load required packages to avoid adding hard Depends
-  if (!nzchar(file)) stop("VERSIONS.yaml not found in installed package. Check installation or supply `file`.")
-  if (!file.exists(file)) stop("VERSIONS file does not exist: ", file)
+  if (!nzchar(file)) {
+    stop("VERSIONS.yaml not found in installed package. Check installation or supply `file`.")
+  }
+  if (!file.exists(file)) {
+    stop("VERSIONS file does not exist: ", file)
+  }
 
-  # Parse YAML.
-  yaml_parsed <- tryCatch({
-    yaml::read_yaml(file)
-  }, error = function(e) {
-    stop("Failed to read YAML VERSIONS file: ", conditionMessage(e))
-  })
+  # Parse YAML
+  yaml_parsed <- tryCatch(
+    yaml::read_yaml(file),
+    error = function(e) stop("Failed to read YAML VERSIONS file: ", conditionMessage(e))
+  )
 
-  # yaml::read_yaml will return a list of records; coerce to data frame safely.
-  # Support either a named list or an unnamed list of records.
-  records <- yaml_parsed
-  if (is.null(records) || length(records) == 0) {
+  # Empty result: return consistent empty tibble
+  if (is.null(yaml_parsed) || length(yaml_parsed) == 0) {
     return(tibble::tibble(dataset = character(), data_version = character(), retrieved = character()))
   }
 
-  # Normalize into a list of lists.
+  # Expect a list of records
+  records <- yaml_parsed
   if (!is.list(records) || (is.list(records) && !is.list(records[[1]]))) {
     stop("Unexpected VERSIONS.yaml structure: expected a list of records.")
   }
 
-  # Extract fields with safe lookup.
+  # Safe field extractor
   extract_field <- function(entry, field) {
     val <- entry[[field]]
-    if (is.null(val)) NA_character_ else as.character(val)
+    if (is.null(val)) return(NA_character_)
+    as.character(val)
   }
 
+  # Build rows as a list of named vectors (safe for binding)
   rows <- lapply(records, function(rec) {
-    # If rec contains 'sources' (combined sources), prefer a top-level data_version and retrieve.
-    list(
+    c(
       dataset = extract_field(rec, "dataset"),
       data_version = extract_field(rec, "data_version"),
       retrieved = extract_field(rec, "retrieved")
     )
   })
 
-  # Bind into tibble.
+  # Bind into tibble robustly
   df <- tryCatch({
-    do.call(rbind, lapply(rows, function(x) as.data.frame(x, stringsAsFactors = FALSE)))
+    # convert each named character vector to one-row tibble then bind
+    do.call(rbind, lapply(rows, function(x) as.data.frame(as.list(x), stringsAsFactors = FALSE)))
   }, error = function(e) {
     stop("Failed to construct data frame from VERSIONS entries: ", conditionMessage(e))
   })
 
-  # Convert to tibble and ensure columns exist.
   df <- tibble::as_tibble(df)
-  # Ensure columns present.
+
+  # Ensure columns exist and are character
   for (col in c("dataset", "data_version", "retrieved")) {
     if (!(col %in% names(df))) df[[col]] <- NA_character_
+    df[[col]] <- as.character(df[[col]])
   }
 
-  # Trim whitespace and return.
-  df[] <- lapply(df, function(x) ifelse(is.na(x), NA_character_, trimws(as.character(x))))
+  # Trim whitespace and normalize NA
+  df[] <- lapply(df, function(x) {
+    x <- trimws(as.character(x))
+    x[x == "NA" | x == ""] <- NA_character_
+    x
+  })
+
   df
 }
