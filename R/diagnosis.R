@@ -47,7 +47,7 @@ diagnosis <- function(diagnoses,
 
   # Join diagnoses with concept set.
   evidence <- diag %>%
-    dplyr::left_join(cs, by = c("code", "system")) %>%
+    dplyr::left_join(concept_set, by = c("code", "system")) %>%
     dplyr::mutate(
       match = dplyr::case_when(
         include == TRUE  ~ "include",
