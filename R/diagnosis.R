@@ -1,7 +1,3 @@
-library(dplyr)
-library(lubridate)
-library(rlang)
-
 #' Extract diagnosis phenotype from diagnosis rows.
 #'
 #' Inputs:
@@ -17,6 +13,10 @@ library(rlang)
 #' @param code_col Name of the code column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
 #' @param system_col Name of the code_type column in the "diagnoses" dataset.
+#' @export
+#' @importFrom dplyr rename mutate left_join filter group_by ungroup arrange distinct summarise select count
+#' @importFrom lubridate as_date
+#' @importFrom rlang sym
 diagnosis <- function(diagnoses,
                                     concept_set,
                                     params = list(
