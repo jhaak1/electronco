@@ -13,10 +13,21 @@
 #'         found, invisible NULL is returned and a warning is issued.
 #' @examples
 #' codemetadata("icd10")
-codemetadata <- function(dataset, file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
-  if (missing(dataset) || !nzchar(dataset)) stop("`dataset` must be supplied as a non-empty string.")
-  if (!nzchar(file)) stop("VERSIONS.yaml not found in installed package. Supply `file` argument.")
-  if (!file.exists(file)) stop("VERSIONS file does not exist: ", file)
+#' @export
+#' @importFrom yaml read_yaml
+codemetadata <- function(dataset,
+                         file = system.file("extdata", "VERSIONS.yaml", package = "electronco")) {
+  if (missing(dataset) || !nzchar(dataset)) {
+    stop("`dataset` must be supplied as a non-empty string.")
+  }
+
+  if (!nzchar(file)) {
+    stop("VERSIONS.yaml not found in installed package. Supply `file` argument.")
+  }
+
+  if (!file.exists(file)) {
+    stop("VERSIONS file does not exist: ", file)
+  }
 
   parsed <- tryCatch(
     yaml::read_yaml(file),
