@@ -133,7 +133,7 @@ diagnosis <- function(diagnoses,
   evidence_out <- evidence_collapsed %>%
     dplyr::left_join(patient_flags %>% dplyr::select(patient_id, first_date), by = "patient_id") %>%
     dplyr::mutate(is_canonical = (date == first_date)) %>%
-    dplyr::select(patient_id, code, .ystem, date, is_canonical)
+    dplyr::select(patient_id, code, system, date, is_canonical)
 
   # Return patient-level data, evidence, and metadata.
   list(
