@@ -34,8 +34,6 @@ diagnosis(
 \item{system_col}{Name of the code_type column in the "diagnoses" dataset.}
 
 \item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
-
-\item{params}{List of parameters supplied by the user (lookback_start, lookback_end, and min_events).}
 }
 \description{
 Inputs:

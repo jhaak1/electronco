@@ -10,7 +10,6 @@
 #' @param lookback_start Beginning date of date range to look at, in the format YYYY-MM-DD (year-month-day).
 #' @param lookback_end End data of date range to look at, in the format YYYY-MM-DD (year-month-day).
 #' @param min_events The minimum number of occurences of a given concept.
-#' @param params List of parameters supplied by the user (lookback_start, lookback_end, and min_events).
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
@@ -131,7 +130,9 @@ diagnosis <- function(diagnoses,
     )
 
   metadata <- list(
-    params = params,
+    lookback_start = lookback_start,
+    lookback_end = lookback_end,
+    min_events = min_events,
     concept_set_used = cs,
     extraction_time = Sys.time()
   )
