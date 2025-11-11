@@ -138,22 +138,6 @@ diagnosis <- function(diagnoses,
       )
     )
 
-  # --- diagnostic: show which window codes still fail to match ----------------------
-  window_codes <- evidence %>%
-    dplyr::filter(.date >= lookback_start, .date <= lookback_end) %>%
-    dplyr::select(.code, .system) %>%
-    dplyr::distinct()
-
-  # show membership against cs for quick inspect (prints small df)
-  diag_mismatch_check <- window_codes %>%
-    dplyr::left_join(cs, by = c(".code", ".system")) %>%
-    dplyr::mutate(match_exists = !is.na(.include))
-
-  print(as.data.frame(diag_mismatch_check))
-  # if any match_exists == FALSE you have remaining nonmatches to inspect
-
-
-
   # -- filter to lookback window ----------------------------------------------------
   evidence_window <- evidence %>%
     dplyr::filter(.date >= lookback_start, .date <= lookback_end)
