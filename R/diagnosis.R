@@ -118,10 +118,15 @@ diagnosis <- function(diagnoses,
     dplyr::filter(.date >= lookback_start, .date <= lookback_end)
 
   ####################################################################################
-  evidence_window %>% dplyr::count(.match, .include, .system, .code, sort = TRUE)
+  # distinct codes from window
+  window_codes <- evidence_window %>% dplyr::select(.code, .system) %>% dplyr::distinct()
+  print(as.data.frame(window_codes))
 
-  # print the full evidence_window using base-friendly print
-  print(as.data.frame(evidence_window[, c(".patient_id", ".date", ".code", ".system", ".include", ".match")]))
+  # check membership in cs (shows .include when match exists)
+  joined <- window_codes %>%
+    dplyr::left_join(cs, by = c(".code", ".system"))
+  print(as.data.frame(joined))
+
 
   ####################################################################################
 
