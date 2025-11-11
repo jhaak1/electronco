@@ -29,3 +29,9 @@
   source_url: "https://www.cms.gov/license/ama?file=/files/zip/list-codes-effective-january-1-2025-published-november-26-2024.zip"
   retrieved: "2025-10-29"
   original_filename: "2025_DHS_Code_List_Addendum_11_26_2024.xlsx"
+  
+- dataset: bc
+  data_version: "PheKB Breast Cancer Phenotype V2"
+  source_url: "https://phekb.org/phenotype/breast-cancer"
+  retrieved: "2025-11-10"
+  original_filename: "BreastCancerPhenotype_V2_codes.xlsx"

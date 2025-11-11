@@ -21,9 +21,9 @@ diagnosis(
 
 \item{concept}{Concept to look for. For breast cancer, specify 'bc'.}
 
-\item{lookback_start}{Beginning date of date range to look at (Date or coercible string).}
+\item{lookback_start}{Beginning date of date range to look at in YYYY-MM-DD (year-month-day) format.}
 
-\item{lookback_end}{End date of date range to look at (Date or coercible string).}
+\item{lookback_end}{End date of date range to look at in YYYY-MM-DD (year-month-day) format.}
 
 \item{min_events}{The minimum number of occurrences of a given concept.}
 
@@ -38,7 +38,7 @@ diagnosis(
 \description{
 Inputs:
 \itemize{
-\item diagnoses: tibble with the following columns: patient_id, code, code_system, date (Date).
+\item diagnoses: tibble with the following columns: patient_id, code, code_system, date.
 \item concept_set: tibble with the following columns: code, code_system, include (logical TRUE=include, FALSE=exclude).
 }
 }

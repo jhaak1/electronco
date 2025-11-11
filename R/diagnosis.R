@@ -1,14 +1,14 @@
 #' Extract diagnosis phenotype from diagnosis rows.
 #'
 #' Inputs:
-#'  - diagnoses: tibble with the following columns: patient_id, code, code_system, date (Date).
+#'  - diagnoses: tibble with the following columns: patient_id, code, code_system, date.
 #'  - concept_set: tibble with the following columns: code, code_system, include (logical TRUE=include, FALSE=exclude).
 #'
 #' Output: list(patient_level, evidence, metadata).
 #' @param diagnoses Dataset imported from a database or csv file.
 #' @param concept Concept to look for. For breast cancer, specify 'bc'.
-#' @param lookback_start Beginning date of date range to look at (Date or coercible string).
-#' @param lookback_end End date of date range to look at (Date or coercible string).
+#' @param lookback_start Beginning date of date range to look at in YYYY-MM-DD (year-month-day) format.
+#' @param lookback_end End date of date range to look at in YYYY-MM-DD (year-month-day) format.
 #' @param min_events The minimum number of occurrences of a given concept.
 #' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
 #' @param code_col Name of the code column in the "diagnoses" dataset.
@@ -25,142 +25,57 @@ diagnosis <- function(diagnoses,
                       system_col = "code_type",
                       date_col = "diagnosis_date") {
 
-  # -- internal helper: flexible date coercion ---------------------------------------
-  .parse_to_date <- function(x, name = "date") {
-    if (is.null(x)) return(as.Date(NA))
-    if (inherits(x, "Date")) return(x)
-    if (inherits(x, "POSIXt")) return(as.Date(x))
+  # Convert lookback_start and lookback_end to date objects.
+  lookback_start = as.Date(lookback_start, '%Y-%m-%d')
+  lookback_end = as.Date(lookback_end, '%Y-%m-%d')
 
-    if (is.character(x)) {
-      x2 <- trimws(x)
-      parsed <- suppressWarnings(as.Date(x2))
-      if (!all(is.na(parsed))) return(parsed)
-      if (requireNamespace("lubridate", quietly = TRUE)) {
-        parsed <- suppressWarnings(lubridate::ymd(x2, quiet = TRUE))
-        if (!all(is.na(parsed))) return(as.Date(parsed))
-        parsed <- suppressWarnings(lubridate::ymd_hms(x2, quiet = TRUE))
-        if (!all(is.na(parsed))) return(as.Date(parsed))
-      }
-      stop(sprintf("Unable to parse %s to Date (example values: %s)", name, paste(head(x2, 3), collapse = ", ")))
-    }
-
-    if (is.numeric(x)) {
-      if (all(x > 1e6, na.rm = TRUE)) {
-        parsed <- suppressWarnings(as.Date(as.character(x), format = "%Y%m%d"))
-        if (!all(is.na(parsed))) return(parsed)
-      }
-      parsed2 <- suppressWarnings(as.Date(x, origin = "1970-01-01"))
-      if (!all(is.na(parsed2))) return(parsed2)
-      stop(sprintf("Unable to coerce numeric %s to Date", name))
-    }
-
-    stop(sprintf("Unsupported type for %s; provide Date, POSIXt, character, or numeric YYYYMMDD", name))
-  }
-
-  # -- coerce and validate lookback dates ------------------------------------------
-  lookback_start <- .parse_to_date(lookback_start, "lookback_start")
-  lookback_end   <- .parse_to_date(lookback_end,   "lookback_end")
-  if (is.na(lookback_start) || is.na(lookback_end)) stop("lookback_start and lookback_end must be valid dates")
-  if (lookback_start > lookback_end) stop("lookback_start must be <= lookback_end")
-
-  # -- validate min_events ----------------------------------------------------------
-  min_events <- as.integer(min_events)
-  if (length(min_events) != 1L || is.na(min_events) || min_events < 1L) stop("min_events must be a single integer >= 1")
-
-  # -- standardize input columns ----------------------------------------------------
+  # Standardize input columns.
   diag <- diagnoses %>%
     dplyr::rename(
-      .patient_id = !!rlang::sym(patient_id_col),
-      .code = !!rlang::sym(code_col),
-      .system = !!rlang::sym(system_col),
-      .date = !!rlang::sym(date_col)
-    ) %>%
-    dplyr::mutate(
-      .code = toupper(gsub("\\.", "", as.character(.code))),
-      .system = toupper(as.character(.system)),
-      .date = lubridate::as_date(.date)
-    )
+      patient_id = patient_id_col,
+      code = code_col,
+      system = system_col,
+      date = date_col)
 
-  # report if many missing dates (optional warning)
-  if (sum(is.na(diag$.date)) > 0) {
-    warning("Some diagnosis rows have missing or unparsable dates; these rows will be excluded by the lookback window")
-  }
+  # Get concept set.
+  if(concept == 'bc'){
+    concept_set = bc_diag_concept
+    } else {
+    print('Warning: concept not recognized.')
+    concept_set = NULL
+    }
 
-  # -- get concept set --------------------------------------------------------------
-  if (identical(concept, "bc")) {
-    if (exists("bc_diag_concept", envir = .GlobalEnv)) concept_set <- get("bc_diag_concept", envir = .GlobalEnv)
-    else stop("Concept set 'bc_diag_concept' not found in the global environment")
-  } else {
-    stop("Unknown concept: ", as.character(concept))
-  }
-
-  # --- normalize helpers ------------------------------------------------------------
-  normalize_code <- function(x) {
-    # remove leading/trailing whitespace, Unicode zero-width spaces, and dots; uppercase
-    x <- as.character(x)
-    x <- gsub("\u200B|\uFEFF", "", x, perl = TRUE) # remove zero-width chars if present
-    x <- trimws(x)
-    x <- gsub("\\.", "", x)
-    toupper(x)
-  }
-  normalize_system <- function(x) {
-    x <- as.character(x)
-    x <- gsub("\u200B|\uFEFF", "", x, perl = TRUE)
-    toupper(trimws(x))
-  }
-
-  # --- build normalized concept set --------------------------------------------------
-  cs <- concept_set %>%
-    dplyr::mutate(
-      .code = normalize_code(code),
-      .system = normalize_system(code_system),
-      .include = as.logical(include)
-    ) %>%
-    dplyr::select(.code, .system, .include) %>%
-    dplyr::distinct()
-
-  # --- normalize diag consistently ---------------------------------------------------
-  diag <- diag %>%
-    dplyr::mutate(
-      .code = normalize_code(.code),
-      .system = normalize_system(.system),
-      .date = lubridate::as_date(.date)
-    )
-
-  # --- join and label ---------------------------------------------------------------
+  # Join diagnoses with concept set.
   evidence <- diag %>%
-    dplyr::left_join(cs, by = c(".code", ".system")) %>%
+    dplyr::left_join(cs, by = c("code", "system")) %>%
     dplyr::mutate(
-      .match = dplyr::case_when(
-        .include == TRUE  ~ "include",
-        .include == FALSE ~ "exclude",
+      match = dplyr::case_when(
+        include == TRUE  ~ "include",
+        include == FALSE ~ "exclude",
         TRUE               ~ "nomatch"
       )
     )
 
-  # -- filter to lookback window ----------------------------------------------------
+  # Filter for lookback window dates.
   evidence_window <- evidence %>%
-    dplyr::filter(.date >= lookback_start, .date <= lookback_end)
+    dplyr::filter(date >= lookback_start, date <= lookback_end)
 
-
-
-  # -- SKIP encounter-level exclusion (no encounter data available) -----------------
-  # Keep rows whose effective match is "include" only; do not apply encounter-level exclusion.
+  # Keep rows whose effective match is "include" only.
   evidence_keep <- evidence_window %>%
-    dplyr::filter(.match == "include") %>%
-    dplyr::arrange(.patient_id, .date)
+    dplyr::filter(match == "include") %>%
+    dplyr::arrange(patient_id, date)
 
-  # -- collapse duplicates per patient+date+code ------------------------------------
+  # Collapse duplicates based on patient+ date + code.
   evidence_collapsed <- evidence_keep %>%
-    dplyr::distinct(.patient_id, .code, .system, .date) %>%
-    dplyr::group_by(.patient_id) %>%
+    dplyr::distinct(patient_id, code, system, date) %>%
+    dplyr::group_by(patient_id) %>%
     dplyr::mutate(evidence_id = dplyr::row_number()) %>%
     dplyr::ungroup()
 
-  # -- patient-level flags ----------------------------------------------------------
+  # Patient-level Flags
   if (nrow(evidence_collapsed) == 0L) {
     patient_flags <- tibble::tibble(
-      .patient_id = character(),
+      patient_id = character(),
       n_total = integer(),
       first_date = as.Date(character()),
       last_date = as.Date(character()),
@@ -169,11 +84,11 @@ diagnosis <- function(diagnoses,
     )
   } else {
     patient_flags <- evidence_collapsed %>%
-      dplyr::group_by(.patient_id) %>%
-      dplyr::summarise(
+      dplyr::group_by(patient_id) %>%
+      dplyr::summarize(
         n_total = dplyr::n(),
-        first_date = if (all(is.na(.date))) as.Date(NA) else min(.date, na.rm = TRUE),
-        last_date  = if (all(is.na(.date))) as.Date(NA) else max(.date, na.rm = TRUE),
+        first_date = if (all(is.na(date))) as.Date(NA) else min(date, na.rm = TRUE),
+        last_date  = if (all(is.na(date))) as.Date(NA) else max(date, na.rm = TRUE),
         .groups = "drop"
       ) %>%
       dplyr::mutate(
@@ -182,16 +97,17 @@ diagnosis <- function(diagnoses,
       )
   }
 
-  # -- include patients with zero matches as FALSE ----------------------------------
+  # Include patients with zero matches as FALSE.
   all_patients <- diagnoses %>%
-    dplyr::distinct(!!rlang::sym(patient_id_col)) %>%
-    dplyr::rename(.patient_id = !!rlang::sym(patient_id_col)) %>%
-    dplyr::mutate(.patient_id = as.character(.patient_id))
+    dplyr::distinct(patient_id_col) %>%
+    dplyr::rename(patient_id = patient_id_col) %>%
+    dplyr::mutate(patient_id = as.character(patient_id))
 
-  patient_flags <- patient_flags %>% dplyr::mutate(.patient_id = as.character(.patient_id))
+  patient_flags <- patient_flags %>%
+    dplyr::mutate(patient_id = as.character(patient_id))
 
   patient_level <- all_patients %>%
-    dplyr::left_join(patient_flags, by = ".patient_id") %>%
+    dplyr::left_join(patient_flags, by = "patient_id") %>%
     dplyr::mutate(
       n_total = tidyr::replace_na(n_total, 0L),
       first_date = lubridate::as_date(first_date),
@@ -199,22 +115,27 @@ diagnosis <- function(diagnoses,
       diagnosis_flag = tidyr::replace_na(diagnosis_flag, FALSE)
     )
 
-  # -- metadata ---------------------------------------------------------------------
+  # Metadata
+  meta1 = yaml::read_yaml(system.file('extdata', 'VERSIONS.yaml', package = 'electronco'))
+
   metadata <- list(
     lookback_start = lookback_start,
     lookback_end = lookback_end,
     min_events = min_events,
     concept_set_used = cs,
-    extraction_time = Sys.time()
+    extraction_time = Sys.time(),
+    dataset = meta1[[concept]][['dataset']],
+    data_version = meta1[[concept]][['data_version']],
+    retrieved = meta1[[concept]][['retrieved']]
   )
 
-  # -- evidence_out -----------------------------------------------------------------
+  # Evidence Out
   evidence_out <- evidence_collapsed %>%
-    dplyr::left_join(patient_flags %>% dplyr::select(.patient_id, first_date), by = ".patient_id") %>%
-    dplyr::mutate(is_canonical = (.date == first_date)) %>%
-    dplyr::select(.patient_id, .code, .system, .date, is_canonical)
+    dplyr::left_join(patient_flags %>% dplyr::select(.patient_id, first_date), by = "patient_id") %>%
+    dplyr::mutate(is_canonical = (date == first_date)) %>%
+    dplyr::select(patient_id, code, .ystem, date, is_canonical)
 
-  # -- return -----------------------------------------------------------------------
+  # Return patient-level data, evidence, and metadata.
   list(
     patient_level = patient_level,
     evidence = evidence_out,
