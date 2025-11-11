@@ -19,6 +19,70 @@
 #' @importFrom lubridate as_date
 #' @importFrom rlang sym
 #' @importFrom tidyr replace_na
+#######################################################################################
+# Helper function to parse date.
+.parse_to_date <- function(x, name = "date") {
+  # preserve length and return Date vector where possible
+  n <- if (is.null(x)) 1L else length(x)
+  # handle NULL
+  if (is.null(x)) return(as.Date(NA))
+
+  # Dates and POSIX
+  if (inherits(x, "Date")) return(x)
+  if (inherits(x, "POSIXt")) return(as.Date(x))
+
+  # Character: try base as.Date (ISO), then lubridate ymd / ymd_hms if available
+  if (is.character(x)) {
+    x2 <- trimws(x)
+    # try vectorized base ISO parse
+    base_try <- suppressWarnings(as.Date(x2))           # accepts "YYYY-MM-DD" and some variants
+    if (!all(is.na(base_try))) {
+      # return parsed vector but preserve NA positions
+      return(base_try)
+    }
+    # try lubridate ymd / ymd_hms heuristics if available
+    if (requireNamespace("lubridate", quietly = TRUE)) {
+      # try ymd (handles "YYYYMMDD", "YYYY-MM-DD", etc.)
+      lub_try <- suppressWarnings(lubridate::ymd(x2, quiet = TRUE))
+      if (!all(is.na(lub_try))) return(as.Date(lub_try))
+      lub_try2 <- suppressWarnings(lubridate::ymd_hms(x2, quiet = TRUE))
+      if (!all(is.na(lub_try2))) return(as.Date(lub_try2))
+      # try dmy / mdy fallbacks (less preferred)
+      lub_try3 <- suppressWarnings(lubridate::dmy(x2, quiet = TRUE))
+      if (!all(is.na(lub_try3))) return(as.Date(lub_try3))
+      lub_try4 <- suppressWarnings(lubridate::mdy(x2, quiet = TRUE))
+      if (!all(is.na(lub_try4))) return(as.Date(lub_try4))
+    }
+    warning(sprintf("Unable to parse %s string(s) to Date (first values shown): %s", name, paste(head(x2, 3), collapse = ", ")), call. = FALSE)
+    return(as.Date(rep(NA, n)))
+  }
+
+  # Numeric: handle YYYYMMDD or epoch days
+  if (is.numeric(x)) {
+    # treat integers > 1e6 as YYYYMMDD
+    if (all(x > 1e6, na.rm = TRUE)) {
+      parsed1 <- suppressWarnings(as.Date(as.character(x), format = "%Y%m%d"))
+      if (!all(is.na(parsed1))) {
+        # for mixed numeric vectors (with NA), return parsed result
+        return(parsed1)
+      }
+    }
+    # fallback: treat as days since 1970-01-01
+    parsed2 <- suppressWarnings(as.Date(x, origin = "1970-01-01"))
+    if (!all(is.na(parsed2))) return(parsed2)
+
+    warning(sprintf("Unable to coerce numeric %s to Date; returning NA", name), call. = FALSE)
+    return(as.Date(rep(NA, n)))
+  }
+
+  # Other types: return NA with warning
+  warning(sprintf("Unsupported type for %s; returning NA", name), call. = FALSE)
+  as.Date(rep(NA, n))
+}
+
+######################################################################################
+# Main function to make cohort based on diagnosis.
+
 diagnosis <- function(diagnoses,
                       concept,
                       lookback_start,
@@ -30,9 +94,8 @@ diagnosis <- function(diagnoses,
                       date_col = "diagnosis_date") {
 
   # Convert lookback_start and lookback_end to dates.
-  lookback_start = as.Date(lookback_start, '%Y-%m-%d')
-  lookback_end = as.Date(lookback_end, '%Y-%m-%d')
-  if (is.na(lookback_start) || is.na(lookback_end)) stop("lookback_start / lookback_end must be coercible to Date")
+  lookback_start = .parse_to_date(lookback_start, 'lookback_start')
+  lookback_end = .parse_to_date(lookback_end, 'lookback_start')
 
   # Standardize column names for internal use.
   diag <- diagnoses %>%
