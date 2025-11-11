@@ -36,9 +36,6 @@ diagnosis <- function(diagnoses,
       .code = !!sym(code_col),
       .system = !!sym(system_col),
       .date = !!sym(date_col),
-      .is_inpatient = !!sym(inpatient_col),
-      .source = !!sym(source_col),
-      .encounter_id = !!sym(encounter_col)
     ) %>%
     mutate(
       .code = toupper(gsub("\\.", "", as.character(.code))),
