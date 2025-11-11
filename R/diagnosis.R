@@ -33,9 +33,9 @@ diagnosis <- function(diagnoses,
   diag <- diagnoses %>%
     dplyr::rename(
       patient_id = patient_id_col,
-      code = code_col,
-      system = system,
-      date = date_col)
+      code = toupper(code_col),
+      system = toupper(system),
+      date = as.Date(date_col))
 
   # Get concept set.
   if(concept == 'bc'){
