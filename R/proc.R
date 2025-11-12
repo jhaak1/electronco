@@ -5,7 +5,6 @@
 #' tibble with provenance metadata.
 #'
 #' @param data Data frame or tibble containing procedure records.
-#' @param codes Internal CPT code list with columns: CODE, Description.
 #' @param patient_id_col Character name of patient id column in data; default "patient_id".
 #' @param code_col Character name of procedure code column in data; default "cpt_code".
 #' @param date_col Character name of procedure date column in data; default "proc_date".

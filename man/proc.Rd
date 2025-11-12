@@ -25,8 +25,6 @@ proc(
 \item{date_format}{Character accepted by as.Date if date_col is character; default NULL.}
 
 \item{verbose}{Logical; print progress messages. Default TRUE.}
-
-\item{codes}{Internal CPT code list with columns: CODE, Description.}
 }
 \value{
 tibble of matched procedures with attribute "metadata" (list).
