@@ -15,5 +15,6 @@ Imports:
     lubridate,
     rlang,
     tibble,
-    yaml
+    yaml,
+    tidyr
 LazyData: true

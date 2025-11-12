@@ -1,8 +1,8 @@
-#' Extract diagnosis phenotype from diagnosis rows.
+#' Extract diagnosis phenotype from diagnosis data.
 #'
 #' Inputs:
-#'  - diagnoses: tibble with the following columns: patient_id, code, code_type, date.
-#'  - concept_set: tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
+#'  - diagnoses: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
+#'  - concept_set (included with package): tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 #'
 #' Output: list(patient_level, evidence, metadata).
 #' @param diagnoses Dataset imported from a database or csv file.
@@ -15,6 +15,9 @@
 #' @param system Name of the code_type column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
 #' @export
+#' @importFrom dplyr mutate across all_of rename left_join group_by summarize arrange distinct n case_when select
+#' @importFrom tidyr replace_na
+#' @importFrom lubridate as_date
 diagnosis <- function(diagnoses,
                       concept,
                       lookback_start,
@@ -58,7 +61,7 @@ diagnosis <- function(diagnoses,
     )
 
   diag <- diag %>%
-    mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+    dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
 
 
@@ -71,7 +74,7 @@ diagnosis <- function(diagnoses,
     }
 
   concept_set <- concept_set %>%
-    mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+    dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
   # Join diagnoses with concept set.
   evidence <- diag %>%

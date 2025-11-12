@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnosis.R
 \name{diagnosis}
 \alias{diagnosis}
-\title{Extract diagnosis phenotype from diagnosis rows.}
+\title{Extract diagnosis phenotype from diagnosis data.}
 \usage{
 diagnosis(
   diagnoses,
@@ -38,8 +38,8 @@ diagnosis(
 \description{
 Inputs:
 \itemize{
-\item diagnoses: tibble with the following columns: patient_id, code, code_type, date.
-\item concept_set: tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
+\item diagnoses: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
+\item concept_set (included with package): tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 }
 }
 \details{
