@@ -26,7 +26,7 @@ proc(
 
 \item{verbose}{Logical; print progress messages. Default TRUE.}
 
-\item{code_list}{Internal CPT code list with columns: CODE, Description.}
+\item{codes}{Internal CPT code list with columns: CODE, Description.}
 }
 \value{
 tibble of matched procedures with attribute "metadata" (list).
