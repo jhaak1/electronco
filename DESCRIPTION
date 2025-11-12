@@ -15,5 +15,6 @@ Imports:
     lubridate,
     tibble,
     yaml,
-    tidyr
+    tidyr,
+    magrittr,
 LazyData: true

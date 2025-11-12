@@ -18,6 +18,7 @@
 #' @importFrom dplyr mutate across all_of rename left_join group_by summarize arrange distinct n case_when select
 #' @importFrom tidyr replace_na
 #' @importFrom lubridate as_date
+#' @importFrom magrittr %>%
 diagnosis <- function(diagnoses,
                       concept,
                       lookback_start,
