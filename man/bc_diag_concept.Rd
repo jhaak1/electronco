@@ -8,7 +8,7 @@
 A data frame with 67 rows and the following columns:
 \describe{
 \item{code}{character. code string.}
-\item{code_system}{character. vocabulary name (e.g., "icd10").}
+\item{system}{character. vocabulary name (e.g., "icd10").}
 \item{include}{logical. T for included codes, F for explicit exclusions.}
 }
 }

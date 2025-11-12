@@ -13,7 +13,6 @@ Depends:
 Imports: 
     dplyr,
     lubridate,
-    rlang,
     tibble,
     yaml,
     tidyr
