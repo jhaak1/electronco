@@ -123,7 +123,7 @@ proc <- function(data,
 
   metadata <- list(
     date_range = date_range,
-    min_events = min_events,
+    min_events = min_count,
     concept_set_used = proc_group,
     extraction_time = Sys.time(),
     dataset = meta1[[proc_group]][['dataset']],
