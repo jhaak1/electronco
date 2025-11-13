@@ -15,6 +15,7 @@
 #' @param verbose logical print progress (default TRUE).
 #' @return tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count) with attribute "provenance".
 #' @export
+#' @importFrom stats setNames
 extract_procedure_cohorts_local <- function(data,
                                             code_list,
                                             patient_id_col = "patient_id",
