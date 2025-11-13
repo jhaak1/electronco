@@ -21,6 +21,11 @@
 #' @importFrom rlang sym
 #' @importFrom yaml read_yaml
 extract_procedure_cohorts_local <- function(data,
+                                            proc_group = c('breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
+                                                           'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
+                                                           'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
+                                                           'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
+                                                           'follow-up care', 'breast cancer screening'),
                                             patient_id_col = "patient_id",
                                             code_col = "cpt_code",
                                             date_col = "proc_date",

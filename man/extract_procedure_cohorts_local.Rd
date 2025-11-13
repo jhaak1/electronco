@@ -6,6 +6,12 @@
 \usage{
 extract_procedure_cohorts_local(
   data,
+  proc_group = c("breast cancer screening", "diagnostic mammography",
+    "breast ultrasound", "mri of the breast", "needle biopsy",
+    "breast specimen radiography", "pathology", "tumor marker testing",
+    "breast-conserving surgery", "mastectomy procedure", "breast reconstruction",
+    "lymph node procedure", "radiation therapy", "chemotherapy", "follow-up care",
+    "breast cancer screening"),
   patient_id_col = "patient_id",
   code_col = "cpt_code",
   date_col = "proc_date",
@@ -17,6 +23,13 @@ extract_procedure_cohorts_local(
 }
 \arguments{
 \item{data}{Data frame or tibble with procedure records.}
+
+\item{proc_group}{The procedure group or groups to be included.  Options are
+'breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
+'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
+'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
+'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
+'follow-up care', and 'breast cancer screening'.}
 
 \item{patient_id_col}{Name of patient id column (default "patient_id").}
 
@@ -31,13 +44,6 @@ extract_procedure_cohorts_local(
 \item{min_count}{Minimum number of matching procedures to qualify for cohort (default 1).}
 
 \item{first_only}{Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).}
-
-\item{proc_group}{The procedure group or groups to be included.  Options are
-'breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
-'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
-'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
-'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
-'follow-up care', and 'breast cancer screening'.}
 }
 \value{
 tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count) and metadata.
