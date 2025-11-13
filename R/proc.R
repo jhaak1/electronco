@@ -20,19 +20,19 @@
 #' @importFrom dplyr as_tibble mutate filter inner_join select group_by summarize rename slice_min ungroup
 #' @importFrom rlang sym
 #' @importFrom yaml read_yaml
-extract_procedure_cohorts_local <- function(data,
-                                            proc_group = c('breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
-                                                           'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
-                                                           'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
-                                                           'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
-                                                           'follow-up care', 'breast cancer screening'),
-                                            patient_id_col = "patient_id",
-                                            code_col = "cpt_code",
-                                            date_col = "proc_date",
-                                            date_format = NULL,
-                                            date_range = NULL,
-                                            min_count = 1,
-                                            first_only = FALSE) {
+proc <- function(data,
+                  proc_group = c('breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
+                    'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
+                    'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
+                    'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
+                    'follow-up care', 'breast cancer screening'),
+                  patient_id_col = "patient_id",
+                  code_col = "cpt_code",
+                  date_col = "proc_date",
+                  date_format = NULL,
+                  date_range = NULL,
+                  min_count = 1,
+                  first_only = FALSE) {
   # Imports used inside.
   stopifnot(is.data.frame(data))
 
