@@ -10,8 +10,7 @@ proc(
     "breast ultrasound", "mri of the breast", "needle biopsy",
     "breast specimen radiography", "pathology", "tumor marker testing",
     "breast-conserving surgery", "mastectomy procedure", "breast reconstruction",
-    "lymph node procedure", "radiation therapy", "chemotherapy", "follow-up care",
-    "breast cancer screening"),
+    "lymph node procedure", "radiation therapy", "chemotherapy", "follow-up care"),
   patient_id_col = "patient_id",
   code_col = "cpt_code",
   date_col = "proc_date",
@@ -29,7 +28,7 @@ proc(
 'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
 'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
 'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
-'follow-up care', and 'breast cancer screening'.}
+and 'follow-up care'.}
 
 \item{patient_id_col}{Name of patient id column (default "patient_id").}
 
@@ -46,7 +45,7 @@ proc(
 \item{first_only}{Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).}
 }
 \value{
-tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count) and metadata.
+tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).
 }
 \description{
 Extract procedure cohorts from local data.
