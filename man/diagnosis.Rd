@@ -13,7 +13,8 @@ diagnosis(
   patient_id_col = "patient_id",
   code_col = "code",
   system = "code_type",
-  date_col = "diagnosis_date"
+  date_col = "diagnosis_date",
+  date_format = "\%Y-\%m-\%d"
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ diagnosis(
 \item{system}{Name of the code_type column in the "diagnoses" dataset.}
 
 \item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
+
+\item{date_format}{R date format of the diagnosis_date column in the "diagnoses" dataset (e.g. '\%Y-\%m-\%d').}
 }
 \description{
 Inputs:

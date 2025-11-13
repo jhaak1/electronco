@@ -14,6 +14,7 @@
 #' @param code_col Name of the code column in the "diagnoses" dataset.
 #' @param system Name of the code_type column in the "diagnoses" dataset.
 #' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
+#' @param date_format R date format of the diagnosis_date column in the "diagnoses" dataset (e.g. '%Y-%m-%d').
 #' @export
 #' @importFrom dplyr mutate across all_of rename left_join group_by summarize arrange distinct n case_when select
 #' @importFrom tidyr replace_na
@@ -27,13 +28,14 @@ diagnosis <- function(diagnoses,
                       patient_id_col = "patient_id",
                       code_col = "code",
                       system = "code_type",
-                      date_col = "diagnosis_date") {
+                      date_col = "diagnosis_date",
+                      date_format = '%Y-%m-%d') {
 
   # Convert lookback_start and lookback_end to date objects.
   lookback_start = as.Date(lookback_start, '%Y-%m-%d')
   lookback_end = as.Date(lookback_end, '%Y-%m-%d')
 
-  # validate input columns early
+  # Validate input columns early.
   required <- c(patient_id_col, code_col, system, date_col)
   missing_cols <- setdiff(required, names(diagnoses))
   if (length(missing_cols) > 0L) {
@@ -49,7 +51,7 @@ diagnosis <- function(diagnoses,
       dplyr::across(dplyr::all_of(code_col), ~ toupper(.x)),
       dplyr::across(dplyr::all_of(system),   ~ toupper(.x)),
       # parse date column into Date
-      dplyr::across(dplyr::all_of(date_col), ~ as.Date(.x, format = "%Y-%m-%d"))
+      dplyr::across(dplyr::all_of(date_col), ~ as.Date(.x, format = date_format))
     )
 
   # canonicalize names to patient_id / code / system / date for downstream code
