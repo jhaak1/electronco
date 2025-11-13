@@ -4,7 +4,7 @@
 #'  - diagnoses: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
 #'  - concept_set (included with package): tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 #'
-#' Output: list(patient_level, evidence, metadata).
+#' Output: list(patient_level, evidence).
 #' @param diagnoses Dataset imported from a database or csv file.
 #' @param concept Concept to look for. For breast cancer, specify 'bc'.
 #' @param lookback_start Beginning date of date range to look at in YYYY-MM-DD (year-month-day) format.
@@ -150,20 +150,6 @@ diagnosis <- function(diagnoses,
       diagnosis_flag  = tidyr::replace_na(diagnosis_flag, FALSE)
     )
 
-  # Metadata
-  meta1 = yaml::read_yaml(system.file('extdata', 'VERSIONS.yaml', package = 'electronco'))
-
-  metadata <- list(
-    lookback_start = lookback_start,
-    lookback_end = lookback_end,
-    min_events = min_events,
-    concept_set_used = concept,
-    extraction_time = Sys.time(),
-    dataset = meta1[[concept]][['dataset']],
-    data_version = meta1[[concept]][['data_version']],
-    retrieved = meta1[[concept]][['retrieved']]
-  )
-
   # Evidence Out
   evidence_out <- evidence_collapsed %>%
     dplyr::left_join(patient_flags %>% dplyr::select(patient_id, first_date), by = "patient_id") %>%
@@ -174,6 +160,5 @@ diagnosis <- function(diagnoses,
   list(
     patient_level = patient_level,
     evidence = evidence_out,
-    metadata = metadata
   )
 }

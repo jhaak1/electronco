@@ -46,5 +46,5 @@ Inputs:
 }
 }
 \details{
-Output: list(patient_level, evidence, metadata).
+Output: list(patient_level, evidence).
 }
