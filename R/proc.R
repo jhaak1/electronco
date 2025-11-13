@@ -92,11 +92,6 @@ proc <- function(data,
     dplyr::distinct(.data$.code_norm, .data$.proc_code_raw) %>%
     utils::head(20)
 
-  if (isTRUE(verbose)) {
-    message(sprintf("Procedures input=%d; matched=%d; unique unmatched sample=%d",
-                    n_input, n_matched, nrow(unmatched_sample)))
-  }
-
   # Group into cohorts.
   cohort_col <- 'group'
   cohorts <- matched %>%
