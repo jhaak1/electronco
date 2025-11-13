@@ -2,54 +2,46 @@
 % Please edit documentation in R/proc.R
 \name{extract_procedure_cohorts_local}
 \alias{extract_procedure_cohorts_local}
-\title{Extract procedure cohorts from local data}
+\title{Extract procedure cohorts from local data.}
 \usage{
 extract_procedure_cohorts_local(
   data,
-  code_list,
   patient_id_col = "patient_id",
   code_col = "cpt_code",
   date_col = "proc_date",
   date_format = NULL,
-  cohort_by = c("proc_group", "proc_label"),
   date_range = NULL,
-  index_dates = NULL,
-  window_days = NA,
   min_count = 1,
-  first_only = TRUE,
-  verbose = TRUE
+  first_only = FALSE
 )
 }
 \arguments{
 \item{data}{Data frame or tibble with procedure records.}
 
-\item{code_list}{data.frame/tibble or path to CSV/YAML with columns: CODE, proc_label, proc_group.}
+\item{patient_id_col}{Name of patient id column (default "patient_id").}
 
-\item{patient_id_col}{name of patient id column (default "patient_id").}
+\item{code_col}{Name of procedure code column (default "cpt_code").}
 
-\item{code_col}{name of procedure code column (default "cpt_code").}
+\item{date_col}{Name of procedure date column (default "proc_date").}
 
-\item{date_col}{name of procedure date column (default "proc_date").}
+\item{date_format}{Optional date format for as.Date if date_col is character.}
 
-\item{date_format}{optional date format for as.Date if date_col is character.}
+\item{date_range}{Optional c(start, end) to limit procedures considered.}
 
-\item{cohort_by}{one of "proc_group" or "proc_label" (default "proc_group").}
+\item{min_count}{Minimum number of matching procedures to qualify for cohort (default 1).}
 
-\item{date_range}{optional c(start, end) to limit procedures considered.}
+\item{first_only}{Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).}
 
-\item{index_dates}{optional data.frame/tibble with columns patient_id and index_date for windowed cohorts.}
-
-\item{window_days}{numeric length of window after index_date to include (if index_dates provided). Use NA for no window.}
-
-\item{min_count}{minimum number of matching procedures to qualify for cohort (default 1).}
-
-\item{first_only}{logical; if TRUE cohort_start is first match and only that is used for inclusion (default TRUE).}
-
-\item{verbose}{logical print progress (default TRUE).}
+\item{proc_group}{The procedure group or groups to be included.  Options are
+'breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
+'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
+'tumor marker testing', 'breast-conserving surgery', 'mastectomy procedure',
+'breast reconstruction', 'lymph node procedure', 'radiation therapy', 'chemotherapy',
+'follow-up care', and 'breast cancer screening'.}
 }
 \value{
-tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count) with attribute "provenance".
+tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count) and metadata.
 }
 \description{
-Extract procedure cohorts from local data
+Extract procedure cohorts from local data.
 }
