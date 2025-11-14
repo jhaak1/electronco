@@ -130,9 +130,10 @@ diagnosis <- function(diagnoses,
   }
 
   # Include patients with zero matches as FALSE.
-  all_patients <- diagnoses %>%
+  # Include patients with zero matches as FALSE. Use canonicalized `diag`
+  # so custom column names work (diag always has patient_id after rename).
+  all_patients <- diag %>%
     dplyr::distinct(patient_id) %>%
-    dplyr::rename(patient_id = patient_id) %>%
     dplyr::mutate(patient_id = as.character(patient_id))
 
   patient_flags <- patient_flags %>%
