@@ -13,10 +13,10 @@ local({
     include = c(TRUE, TRUE)
   )
 
-  # Ensure removal when this file's tests finish; safe guard if missing
+  # Safe deferred cleanup: only remove if the binding exists in .GlobalEnv
   defer({
-    if (exists("bc_diag_concept", envir = .GlobalEnv)) {
-      rm(bc_diag_concept, envir = .GlobalEnv)
+    if (exists("bc_diag_concept", envir = .GlobalEnv, inherits = FALSE)) {
+      rm(list = "bc_diag_concept", envir = .GlobalEnv)
     }
   }, envir = parent.frame())
 
