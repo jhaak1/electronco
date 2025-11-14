@@ -3,6 +3,7 @@ library(testthat)
 library(tibble)
 library(dplyr)
 library(lubridate)
+library(withr)
 
 # Preserve original bc_diag_concept if present, then inject our test set globally.
 old_bc <- if (exists("bc_diag_concept", inherits = TRUE)) {
@@ -17,14 +18,8 @@ bc_diag_concept <<- tibble::tibble(
   include = c(TRUE, TRUE)
 )
 
-# Restore after all tests in this file
-testthat::teardown({
-  if (!is.null(old_bc)) {
-    bc_diag_concept <<- old_bc
-  } else {
-    rm(bc_diag_concept, inherits = TRUE)
-  }
-})
+# Ensure removal when this file's tests finish.
+defer(rm(bc_diag_concept, envir = .GlobalEnv), envir = parent.frame())
 
 test_that("error when required columns are missing", {
   bad_df <- tibble(patient_id = 1:3, code = c("C50","C50","C50"))
