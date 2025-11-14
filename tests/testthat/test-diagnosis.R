@@ -4,18 +4,37 @@ library(tibble)
 library(dplyr)
 library(lubridate)
 
-# Define a minimal concept set for breast cancer (bc).
-bc_diag_concept <- tibble::tibble(
-  code = c("C50.01", "174"),
-  system = c("icd10", "icd10"),
+# Preserve original bc_diag_concept if present, then inject our test set globally.
+old_bc <- if (exists("bc_diag_concept", inherits = TRUE)) {
+  get("bc_diag_concept", inherits = TRUE)
+} else {
+  NULL
+}
+
+bc_diag_concept <<- tibble::tibble(
+  code = c("C50", "D05"),        # match the test data codes
+  system = c("ICD10", "ICD10"),  # match normalized system
   include = c(TRUE, TRUE)
 )
+
+# Restore after all tests in this file
+testthat::teardown({
+  if (!is.null(old_bc)) {
+    bc_diag_concept <<- old_bc
+  } else {
+    rm(bc_diag_concept, inherits = TRUE)
+  }
+})
 
 test_that("error when required columns are missing", {
   bad_df <- tibble(patient_id = 1:3, code = c("C50","C50","C50"))
   expect_error(
-    diagnosis(bad_df, concept = "bc", lookback_start = "2020-01-01", lookback_end = "2020-12-31"),
-    "diagnoses is missing columns."
+    diagnosis(
+      bad_df, concept = "bc",
+      lookback_start = "2020-01-01", lookback_end = "2020-12-31"
+    ),
+    # Function message doesn't end with a period; accept substring to avoid brittleness
+    regexp = "diagnoses is missing columns"
   )
 })
 
@@ -70,14 +89,17 @@ test_that("lookback window filters out events outside range", {
   expect_equal(res$evidence$date, as.Date("2020-05-01"))
 })
 
-test_that("non-recognized concept prints warning and returns no matches", {
+test_that("non-recognized concept warns and returns no matches", {
   df <- tibble(
     patient_id = "p1",
     code = "C50",
     code_type = "ICD10",
     diagnosis_date = "2020-01-01"
   )
-  res <- diagnosis(df, concept = "xyz", lookback_start = "2020-01-01", lookback_end = "2020-12-31")
+  expect_warning(
+    res <- diagnosis(df, concept = "xyz", lookback_start = "2020-01-01", lookback_end = "2020-12-31"),
+    "Concept not recognized"
+  )
   expect_equal(nrow(res$evidence), 0)
   expect_equal(res$patient_level$diagnosis_flag, FALSE)
 })
