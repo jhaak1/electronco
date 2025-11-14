@@ -18,31 +18,31 @@ codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package 
     stop("VERSIONS file does not exist: ", file)
   }
 
-  # Parse YAML
+  # Parse YAML.
   yaml_parsed <- tryCatch(
     yaml::read_yaml(file),
     error = function(e) stop("Failed to read YAML VERSIONS file: ", conditionMessage(e))
   )
 
-  # Empty result: return consistent empty tibble
+  # Empty result: return consistent empty tibble.
   if (is.null(yaml_parsed) || length(yaml_parsed) == 0) {
     return(tibble::tibble(dataset = character(), data_version = character(), retrieved = character()))
   }
 
-  # Expect a list of records
+  # Expect a list of records.
   records <- yaml_parsed
   if (!is.list(records) || (is.list(records) && !is.list(records[[1]]))) {
     stop("Unexpected VERSIONS.yaml structure: expected a list of records.")
   }
 
-  # Safe field extractor
+  # Safe Field Extractor
   extract_field <- function(entry, field) {
     val <- entry[[field]]
     if (is.null(val)) return(NA_character_)
     as.character(val)
   }
 
-  # Build rows as a list of named vectors (safe for binding)
+  # Build rows as a list of named vectors (safe for binding).
   rows <- lapply(records, function(rec) {
     c(
       dataset = extract_field(rec, "dataset"),
@@ -51,9 +51,9 @@ codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package 
     )
   })
 
-  # Bind into tibble robustly
+  # Bind into tibble robustly.
   df <- tryCatch({
-    # convert each named character vector to one-row tibble then bind
+    # Convert each named character vector to one-row tibble, then bind.
     do.call(rbind, lapply(rows, function(x) as.data.frame(as.list(x), stringsAsFactors = FALSE)))
   }, error = function(e) {
     stop("Failed to construct data frame from VERSIONS entries: ", conditionMessage(e))
@@ -61,13 +61,13 @@ codeversions <- function(file = system.file("extdata", "VERSIONS.yaml", package 
 
   df <- tibble::as_tibble(df)
 
-  # Ensure columns exist and are character
+  # Ensure columns exist and are character.
   for (col in c("dataset", "data_version", "retrieved")) {
     if (!(col %in% names(df))) df[[col]] <- NA_character_
     df[[col]] <- as.character(df[[col]])
   }
 
-  # Trim whitespace and normalize NA
+  # Trim whitespace and normalize NA.
   df[] <- lapply(df, function(x) {
     x <- trimws(as.character(x))
     x[x == "NA" | x == ""] <- NA_character_

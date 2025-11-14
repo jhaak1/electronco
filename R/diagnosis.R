@@ -42,19 +42,19 @@ diagnosis <- function(diagnoses,
     stop("diagnoses is missing columns: ", paste(missing_cols, collapse = ", "))
   }
 
-  # normalize types and values using programmatic column selection
+  # Normalize types and values using programmatic column selection.
   diagnoses <- diagnoses %>%
     dplyr::mutate(
-      # ensure patient id string
+      # Ensure patient id string.
       dplyr::across(dplyr::all_of(patient_id_col), as.character),
-      # uppercase code and system columns (operate on the actual columns named by the params)
+      # Uppercase code and system columns (operate on the actual columns named by the params).
       dplyr::across(dplyr::all_of(code_col), ~ toupper(.x)),
       dplyr::across(dplyr::all_of(system),   ~ toupper(.x)),
-      # parse date column into Date
+      # Parse date column into Date.
       dplyr::across(dplyr::all_of(date_col), ~ as.Date(.x, format = date_format))
     )
 
-  # canonicalize names to patient_id / code / system / date for downstream code
+  # Canonicalize names to patient_id / code / system / date for downstream code.
   diag <- diagnoses %>%
     dplyr::rename(
       patient_id = dplyr::all_of(patient_id_col),
@@ -65,8 +65,6 @@ diagnosis <- function(diagnoses,
 
   diag <- diag %>%
     dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
-
-
 
   # Get concept set.
   if(concept == 'bc'){
@@ -156,7 +154,7 @@ diagnosis <- function(diagnoses,
     dplyr::mutate(is_canonical = (date == first_date)) %>%
     dplyr::select(patient_id, code, system, date, is_canonical)
 
-  # Return patient-level data, evidence, and metadata.
+  # Return patient-level data and evidence.
   list(
     patient_level = patient_level,
     evidence = evidence_out,
