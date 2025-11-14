@@ -74,8 +74,12 @@ diagnosis <- function(diagnoses,
     concept_set = NULL
     }
 
-  concept_set <- concept_set %>%
-    dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+  if (!is.null(concept_set)) {
+    concept_set <- concept_set %>%
+      dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+  } else {
+    concept_set <- tibble::tibble(code = character(), system = character(), include = logical())
+  }
 
   # Join diagnoses with concept set.
   evidence <- diag %>%
@@ -157,6 +161,6 @@ diagnosis <- function(diagnoses,
   # Return patient-level data and evidence.
   list(
     patient_level = patient_level,
-    evidence = evidence_out,
+    evidence = evidence_out
   )
 }
