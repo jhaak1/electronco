@@ -6,19 +6,47 @@ library(lubridate)
 library(withr)
 
 local({
-  # Inject test concept set into the global environment so diagnosis() can find it
-  bc_diag_concept <<- tibble::tibble(
-    code = c("C50", "D05"),        # codes used in the tests
-    system = c("ICD10", "ICD10"),  # normalized system strings
+  # test file header: inside local({ ... })
+  test_concept_tbl <- tibble::tibble(
+    code = c("C50", "D05"),
+    system = c("ICD10", "ICD10"),
     include = c(TRUE, TRUE)
   )
 
-  # Safe deferred cleanup: only remove if the binding exists in .GlobalEnv
-  defer({
-    if (exists("bc_diag_concept", envir = .GlobalEnv, inherits = FALSE)) {
-      rm(list = "bc_diag_concept", envir = .GlobalEnv)
+  assigned_test_concept <- FALSE
+  assign_attempt <- tryCatch({
+    # only assign if global binding either doesn't exist or is not locked
+    if (!exists("bc_diag_concept", envir = .GlobalEnv, inherits = FALSE)) {
+      bc_diag_concept <<- test_concept_tbl
+      assigned_test_concept <<- TRUE
+    } else {
+      # binding exists in .GlobalEnv; check if it's locked
+      binding_info <- bindingIsLocked("bc_diag_concept", env = .GlobalEnv)
+      if (!binding_info) {
+        bc_diag_concept <<- test_concept_tbl
+        assigned_test_concept <<- TRUE
+      } else {
+        # cannot override a locked binding – fall back to package-provided dataset
+        message("bc_diag_concept binding is locked; tests will use package dataset.")
+        assigned_test_concept <<- FALSE
+      }
     }
-  }, envir = parent.frame())
+    TRUE
+  }, error = function(e) {
+    message("Could not assign test bc_diag_concept into .GlobalEnv: ", conditionMessage(e))
+    assigned_test_concept <<- FALSE
+    FALSE
+  })
+
+  # only register cleanup if we actually replaced/created the global binding
+  if (assigned_test_concept) {
+    defer({
+      if (exists("bc_diag_concept", envir = .GlobalEnv, inherits = FALSE) &&
+          !bindingIsLocked("bc_diag_concept", env = .GlobalEnv)) {
+        rm(list = "bc_diag_concept", envir = .GlobalEnv)
+      }
+    }, envir = parent.frame())
+  }
 
   test_that("error when required columns are missing", {
     bad_df <- tibble(patient_id = 1:3, code = c("C50","C50","C50"))

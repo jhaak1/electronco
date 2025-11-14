@@ -17,7 +17,8 @@ Imports:
     yaml,
     tidyr,
     magrittr,
-    rlang
+    rlang,
+    withr
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
