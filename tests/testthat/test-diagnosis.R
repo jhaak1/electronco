@@ -6,8 +6,8 @@ library(lubridate)
 
 # Define a minimal concept set for breast cancer (bc).
 bc_diag_concept <- tibble::tibble(
-  code = c("C50", "D05"),
-  system = c("ICD10", "ICD10"),
+  code = c("C50.01", "174"),
+  system = c("icd10", "icd10"),
   include = c(TRUE, TRUE)
 )
 

@@ -67,19 +67,15 @@ diagnosis <- function(diagnoses,
     dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
   # Get concept set.
-  if(concept == 'bc'){
-    concept_set = bc_diag_concept
-    } else {
-    print('Warning: concept not recognized.')
-    concept_set = NULL
-    }
-
-  if (!is.null(concept_set)) {
-    concept_set <- concept_set %>%
-      dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
+  if (concept == 'bc') {
+    concept_set <- bc_diag_concept
   } else {
+    warning('Concept not recognized.')
     concept_set <- tibble::tibble(code = character(), system = character(), include = logical())
   }
+
+  concept_set <- concept_set %>%
+    dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
   # Join diagnoses with concept set.
   evidence <- diag %>%
