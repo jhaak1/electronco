@@ -19,7 +19,7 @@
 #' @export
 #' @importFrom stats setNames
 #' @importFrom dplyr as_tibble mutate filter inner_join select group_by summarize rename slice_min ungroup
-#' @importFrom rlang sym
+#' @importFrom rlang sym :=
 proc <- function(data,
                  proc_group = c('breast cancer screening', 'diagnostic mammography', 'breast ultrasound',
                                 'mri of the breast', 'needle biopsy', 'breast specimen radiography', 'pathology',
