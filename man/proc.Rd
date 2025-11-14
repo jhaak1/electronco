@@ -17,7 +17,8 @@ proc(
   date_format = NULL,
   date_range = NULL,
   min_count = 1,
-  first_only = FALSE
+  first_only = FALSE,
+  code_list = NULL
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ and 'follow-up care'.}
 \item{min_count}{Minimum number of matching procedures to qualify for cohort (default 1).}
 
 \item{first_only}{Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).}
+
+\item{code_list}{A custom dataframe or tibble of codes to use.}
 }
 \value{
 tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).

@@ -14,6 +14,7 @@
 #' @param date_range Optional c(start, end) to limit procedures considered.
 #' @param min_count Minimum number of matching procedures to qualify for cohort (default 1).
 #' @param first_only Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).
+#' @param code_list A custom dataframe or tibble of codes to use.
 #' @return tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).
 #' @export
 #' @importFrom stats setNames
@@ -31,11 +32,12 @@ proc <- function(data,
                  date_format = NULL,
                  date_range = NULL,
                  min_count = 1,
-                 first_only = FALSE) {
+                 first_only = FALSE,
+                 code_list = NULL) {
   stopifnot(is.data.frame(data))
 
-  # Load code_list (assumed available in environment)
-  codes <- bc_proc_concept
+  # Load code_list (assumed available in environment).
+  codes <- if (is.null(code_list)) bc_proc_concept else code_list
 
   required_code_cols <- c("code", "group")
   if (!all(required_code_cols %in% colnames(codes))) {
