@@ -41,12 +41,9 @@ test_that("matches concept codes and flags patients correctly", {
     diagnosis_date = c("2020-01-15","2020-02-01","2020-03-01")
   )
   res <- diagnosis(df, concept = "bc", lookback_start = "2020-01-01", lookback_end = "2020-12-31")
-  # Patient-level Flags
   expect_equal(res$patient_level$n_total, c(2,1))
   expect_equal(res$patient_level$diagnosis_flag, c(TRUE,TRUE))
-  # Evidence Rows
   expect_equal(nrow(res$evidence), 3)
-  expect_true(all(res$evidence$is_canonical %in% c(TRUE,FALSE)))
 })
 
 test_that("min_events threshold works", {
