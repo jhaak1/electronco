@@ -13,8 +13,12 @@ local({
     include = c(TRUE, TRUE)
   )
 
-  # Ensure removal when this file's tests finish
-  defer(rm(bc_diag_concept, envir = .GlobalEnv), envir = parent.frame())
+  # Ensure removal when this file's tests finish; safe guard if missing
+  defer({
+    if (exists("bc_diag_concept", envir = .GlobalEnv)) {
+      rm(bc_diag_concept, envir = .GlobalEnv)
+    }
+  }, envir = parent.frame())
 
   test_that("error when required columns are missing", {
     bad_df <- tibble(patient_id = 1:3, code = c("C50","C50","C50"))
@@ -112,7 +116,12 @@ local({
     )
     # Temporarily override global concept for this scope
     bc_diag_concept <<- bc_diag_concept_extra
-    defer(bc_diag_concept <<- bc_diag_concept[1:2, ], envir = parent.frame())
+    defer({
+      if (exists("bc_diag_concept", envir = .GlobalEnv)) {
+        # restore original (first two rows)
+        bc_diag_concept <<- bc_diag_concept[1:2, ]
+      }
+    }, envir = parent.frame())
 
     df <- tibble(
       patient_id = c("p1","p1"),
