@@ -16,22 +16,22 @@
 #' @param first_only If TRUE keep only the earliest exposure per patient x drug.
 #' @param inc_original_cols If TRUE include original input columns in the output; otherwise return a slim cohort table.
 #'
-#' @returns Tibble of matched rows with provenance columns: cohort_flag, drug_matched, match_method.
+#' @returns Tibble of matched rows with provenance columns: cohort_flag, drug_matched.
 #' @export
 #' @importFrom dplyr mutate filter arrange group_by slice_head ungroup select everything all_of rename
-#' @importFrom lubridate ymd
+#' @importFrom lubridate ymd ymd_hms
 #' @importFrom stringr str_to_lower str_trim
 meds <- function(data,
-                            drugs,
-                            patient_id = "patient_id",
-                            order_date = "order_date",
-                            med_name = "med_name",
-                            route = "route",
-                            dose = "dose",
-                            route_filter = NULL,
-                            date_range = NULL,
-                            first_only = TRUE,
-                            inc_original_cols = FALSE) {
+                 drugs,
+                 patient_id = "patient_id",
+                 order_date = "order_date",
+                 med_name = "med_name",
+                 route = "route",
+                 dose = "dose",
+                 route_filter = NULL,
+                 date_range = NULL,
+                 first_only = TRUE,
+                 inc_original_cols = FALSE) {
   # Defensive checks
   if (!is.data.frame(data)) stop("`data` must be a data.frame or tibble.")
   req_cols <- c(patient_id, order_date, med_name)
@@ -62,10 +62,9 @@ meds <- function(data,
     stop("Some requested drugs are not in the allowed list: ", paste(not_allowed, collapse = ", "))
   }
 
-  # Prepare working data
+  # Prepare working data with helper columns (will be removed before return)
   df_work <- data %>%
     dplyr::mutate(
-      # keep patient id column as-is for joins/arrange
       !!rlang::sym(patient_id) := .data[[patient_id]],
       .order_date_parsed = {
         od <- .data[[order_date]]
@@ -84,7 +83,7 @@ meds <- function(data,
   # Optional date range filter
   if (!is.null(date_range)) {
     start <- lubridate::ymd(date_range[1])
-    end   <- lubridate::ymd(date_range[1 + 1])
+    end   <- lubridate::ymd(date_range[2])
     if (is.na(start) || is.na(end)) stop("date_range values must be parseable as dates (YYYY-MM-DD recommended).")
     df_work <- df_work %>% dplyr::filter(.order_date_parsed >= start & .order_date_parsed <= end)
   }
@@ -101,8 +100,7 @@ meds <- function(data,
     dplyr::filter(.med_name_norm %in% user_drugs_norm) %>%
     dplyr::mutate(
       cohort_flag = TRUE,
-      drug_matched = .med_name_norm,
-      match_method = "exact_norm"
+      drug_matched = .med_name_norm
     )
 
   # If first_only is TRUE, keep earliest exposure per patient x drug_matched
@@ -114,15 +112,16 @@ meds <- function(data,
       dplyr::ungroup()
   }
 
-  # Prepare output: include provenance columns and optionally original columns only
-  out <- df_matched %>%
-    dplyr::mutate(cohort_flag = as.logical(cohort_flag))
+  # Drop internal helper columns before preparing final output
+  df_matched <- df_matched %>%
+    dplyr::select(-dplyr::any_of(c(".order_date_parsed", ".med_name_norm")))
 
+  # Prepare output: include provenance columns and optionally original columns only
   if (inc_original_cols) {
-    out <- out %>% dplyr::select(dplyr::everything(), cohort_flag, drug_matched, match_method)
+    out <- df_matched %>% dplyr::select(dplyr::everything(), cohort_flag, drug_matched)
   } else {
-    out <- out %>% dplyr::select(dplyr::all_of(patient_id), .order_date_parsed, drug_matched, cohort_flag, match_method) %>%
-      dplyr::rename(!!order_date := .order_date_parsed)
+    out <- df_matched %>%
+      dplyr::select(dplyr::all_of(patient_id), dplyr::all_of(order_date), drug_matched, cohort_flag)
   }
 
   tibble::as_tibble(out)

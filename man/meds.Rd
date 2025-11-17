@@ -46,7 +46,7 @@ Paclitaxel, pembrolizumab, pertuzumab, Tamoxifen, Trastuzumab.}
 \item{inc_original_cols}{If TRUE include original input columns in the output; otherwise return a slim cohort table.}
 }
 \value{
-Tibble of matched rows with provenance columns: cohort_flag, drug_matched, match_method.
+Tibble of matched rows with provenance columns: cohort_flag, drug_matched.
 }
 \description{
 Extract medication cohorts.
