@@ -15,7 +15,7 @@ meds(
   route_filter = NULL,
   date_range = NULL,
   first_only = TRUE,
-  inc_original_cols = TRUE
+  inc_original_cols = FALSE
 )
 }
 \arguments{

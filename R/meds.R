@@ -31,7 +31,7 @@ meds <- function(data,
                             route_filter = NULL,
                             date_range = NULL,
                             first_only = TRUE,
-                            inc_original_cols = TRUE) {
+                            inc_original_cols = FALSE) {
   # Defensive checks
   if (!is.data.frame(data)) stop("`data` must be a data.frame or tibble.")
   req_cols <- c(patient_id, order_date, med_name)
