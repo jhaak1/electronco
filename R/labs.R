@@ -3,27 +3,24 @@
 #' @param data Dataframe or tibble with input data.
 #' @param markers Vector of the markers to look for.
 #' @param match_type How to match the values specified in "markers".
-#' Can be 'exact', 'contains', or 'regex'.
+#' Can be 'exact' or 'contains'.
 #' @param patient_id_col Name of the patient_id column in data.
 #' @param lab_date_col Name of the lab_date column in data.
 #' @param lab_name_col Name of the lab_name column in data.
 #' @param date_range Beginning and ending dates to look for.
 #' @param cohort_type Type of cohort to find.
 #' Can be 'any', 'first', 'last', or 'all'.
-#' 'any' Returns one row for each patient who matches the query.
-#' 'first' Returns the earliest date for each person who matches the query.
-#' 'last' Returns the latest date for each patient who matches the query.
-#' 'all' Returns all rows for all patients who match the query.
-#' @param min_tests Minimum number of occurences per patient to filter for.
+#' @param min_tests Minimum number of occurrences per patient to filter for.
 #'
-#' @returns
+#' @returns a tibble whose shape depends on cohort_type
 #' @export
 #'
-#' @importFrom dplyr tibble n everything
-#' @importFrom stringr str_replace_all str_detect regex
+#' @importFrom dplyr tibble n everything group_by summarise filter arrange slice_head ungroup left_join count select everything
+#' @importFrom stringr str_detect fixed
+#' @importFrom rlang sym
 labs <- function(data,
                  markers,
-                 match_type = c("exact", "contains", "regex"),
+                 match_type = c("exact", "contains"),
                  patient_id_col = "patient_id",
                  lab_date_col = "lab_date",
                  lab_name_col = "lab_name",
@@ -59,7 +56,6 @@ labs <- function(data,
     if (is.na(start) || is.na(end)) stop("`date_range` values must be coercible to Date.")
     data <- data[!is.na(data[[lab_date_col]]) & data[[lab_date_col]] >= start & data[[lab_date_col]] <= end, , drop = FALSE]
     if (nrow(data) == 0) {
-      # Return empty tibble with consistent columns depending on cohort_type.
       if (cohort_type == "any") {
         return(dplyr::tibble(!!patient_id_col := character(), first_lab_date = as.Date(character()), last_lab_date = as.Date(character()), n_tests = integer()))
       } else if (cohort_type %in% c("first", "last")) {
@@ -78,19 +74,11 @@ labs <- function(data,
     markers_set <- unique(as.character(markers))
     matches <- lab_vec %in% markers_set
   } else if (match_type == "contains") {
-    # Escape parentheses in markers to avoid regex errors, then paste.
-    esc <- stringr::str_replace_all(markers, "([\\^$.|?*+(){}\
-
-\[\\]
-
-\\\\]
-
-)", "\\\\\\1")
-    pattern <- paste0("(", paste0(esc, collapse = "|"), ")")
-    matches <- stringr::str_detect(lab_vec, stringr::regex(pattern, ignore_case = TRUE))
-  } else if (match_type == "regex") {
-    pattern <- paste0("(", paste0(markers, collapse = "|"), ")")
-    matches <- stringr::str_detect(lab_vec, stringr::regex(pattern, ignore_case = TRUE))
+    # Literal, case-insensitive substring matching without regex.
+    # Use stringr::fixed to avoid regex interpretation and set ignore_case = TRUE.
+    for (m in as.character(markers)) {
+      matches <- matches | stringr::str_detect(lab_vec, stringr::fixed(m, ignore_case = TRUE))
+    }
   }
 
   data_matched <- data[matches, , drop = FALSE]
@@ -104,57 +92,58 @@ labs <- function(data,
     }
   }
 
-  # Use dplyr for grouping and selection.
+  # Use dplyr and rlang for grouping and selection.
   pid <- rlang::sym(patient_id_col)
   ldate <- rlang::sym(lab_date_col)
   lname <- rlang::sym(lab_name_col)
 
   if (cohort_type == "any") {
     result <- data_matched %>%
-      group_by(!!pid) %>%
-      summarise(
+      dplyr::group_by(!!pid) %>%
+      dplyr::summarise(
         first_lab_date = min(!!ldate, na.rm = TRUE),
         last_lab_date = max(!!ldate, na.rm = TRUE),
         n_tests = dplyr::n(),
         .groups = "drop"
       ) %>%
-      filter(n_tests >= min_tests)
+      dplyr::filter(n_tests >= min_tests)
     return(result)
   }
 
   if (cohort_type == "first") {
+    counts <- data_matched %>% dplyr::count(!!pid, name = "n_tests")
     result <- data_matched %>%
-      group_by(!!pid) %>%
-      arrange(!!ldate, .by_group = TRUE) %>%
-      slice_head(n = 1) %>%
-      ungroup() %>%
-      mutate(n_tests = dplyr::n(), .before = 1) # placeholder; replaced below
-    # Proper per-patient counts and filter.
-    counts <- data_matched %>% count(!!pid, name = "n_tests")
-    result <- result %>% left_join(counts, by = setNames(patient_id_col, patient_id_col)) %>% filter(n_tests >= min_tests)
-    return(result %>% select(!!pid, !!ldate, !!lname, n_tests))
+      dplyr::group_by(!!pid) %>%
+      dplyr::arrange(!!ldate, .by_group = TRUE) %>%
+      dplyr::slice_head(n = 1) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>%
+      dplyr::filter(n_tests >= min_tests) %>%
+      dplyr::select(!!pid, !!ldate, !!lname, n_tests)
+    return(result)
   }
 
   if (cohort_type == "last") {
+    counts <- data_matched %>% dplyr::count(!!pid, name = "n_tests")
     result <- data_matched %>%
-      group_by(!!pid) %>%
-      arrange(desc(!!ldate), .by_group = TRUE) %>%
-      slice_head(n = 1) %>%
-      ungroup()
-    counts <- data_matched %>% count(!!pid, name = "n_tests")
-    result <- result %>% left_join(counts, by = setNames(patient_id_col, patient_id_col)) %>% filter(n_tests >= min_tests)
-    return(result %>% select(!!pid, !!ldate, !!lname, n_tests))
+      dplyr::group_by(!!pid) %>%
+      dplyr::arrange(desc(!!ldate), .by_group = TRUE) %>%
+      dplyr::slice_head(n = 1) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>%
+      dplyr::filter(n_tests >= min_tests) %>%
+      dplyr::select(!!pid, !!ldate, !!lname, n_tests)
+    return(result)
   }
 
   # cohort_type == "all"
   if (cohort_type == "all") {
-    result <- data_matched %>%
-      arrange(!!pid, !!ldate)
+    result <- data_matched %>% dplyr::arrange(!!pid, !!ldate)
     if (min_tests > 1) {
-      counts <- data_matched %>% count(!!pid, name = "n_tests")
-      result <- result %>% left_join(counts, by = setNames(patient_id_col, patient_id_col)) %>% filter(n_tests >= min_tests)
+      counts <- data_matched %>% dplyr::count(!!pid, name = "n_tests")
+      result <- result %>% dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>% dplyr::filter(n_tests >= min_tests)
     }
-    return(result %>% select(!!pid, !!ldate, !!lname, dplyr::everything()))
+    return(result %>% dplyr::select(!!pid, !!ldate, !!lname, dplyr::everything()))
   }
 
 }
