@@ -8,8 +8,13 @@
 #' @param lab_date_col Name of the lab_date column in data.
 #' @param lab_name_col Name of the lab_name column in data.
 #' @param date_range Beginning and ending dates to look for.
-#' @param cohort_type Type of cohort to find.
-#' Can be 'any', 'first', 'last', or 'all'.
+#' @param cohort_type Type of cohort to find. One of:
+#' #'
+#' - any.  Returns one row per patient matching the query.
+#' - first.  Returns the first time a patient had that lab.
+#' - last.  Returns the last time the patient had that lab.
+#' - all.  Returns all occurrences that match the query.
+
 #' @param min_tests Minimum number of occurrences per patient to filter for.
 #'
 #' @returns a tibble whose shape depends on cohort_type

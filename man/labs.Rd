@@ -32,8 +32,14 @@ Can be 'exact' or 'contains'.}
 
 \item{date_range}{Beginning and ending dates to look for.}
 
-\item{cohort_type}{Type of cohort to find.
-Can be 'any', 'first', 'last', or 'all'.}
+\item{cohort_type}{Type of cohort to find. One of:
+#'
+\itemize{
+\item any.  Returns one row per patient matching the query.
+\item first.  Returns the first time a patient had that lab.
+\item last.  Returns the last time the patient had that lab.
+\item all.  Returns all occurrences that match the query.
+}}
 
 \item{min_tests}{Minimum number of occurrences per patient to filter for.}
 }
