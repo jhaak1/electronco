@@ -9,7 +9,6 @@
 #' @param lab_name_col Name of the lab_name column in data.
 #' @param date_range Beginning and ending dates to look for.
 #' @param cohort_type Type of cohort to find. One of:
-#' #'
 #' - any.  Returns one row per patient matching the query.
 #' - first.  Returns the first time a patient had that lab.
 #' - last.  Returns the last time the patient had that lab.
