@@ -14,7 +14,7 @@ meds(
   dose = "dose",
   route_filter = NULL,
   date_range = NULL,
-  first_only = TRUE,
+  first_only = FALSE,
   inc_original_cols = FALSE
 )
 }
@@ -39,7 +39,7 @@ Paclitaxel, pembrolizumab, pertuzumab, Tamoxifen, Trastuzumab.}
 
 \item{route_filter}{Character vector of allowed routes (case-insensitive); NULL to skip.}
 
-\item{date_range}{Date window c(start, end) where values are parseable by lubridate::ymd.}
+\item{date_range}{Date window c(start, end) where dates are in YYYY-MM-DD format (e.g. 2025-01-01).}
 
 \item{first_only}{If TRUE keep only the earliest exposure per patient x drug.}
 

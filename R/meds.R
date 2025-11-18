@@ -12,7 +12,7 @@
 #' @param route Name of the route column in data.
 #' @param dose Name of the dose column in data.
 #' @param route_filter Character vector of allowed routes (case-insensitive); NULL to skip.
-#' @param date_range Date window c(start, end) where values are parseable by lubridate::ymd.
+#' @param date_range Date window c(start, end) where dates are in YYYY-MM-DD format (e.g. 2025-01-01).
 #' @param first_only If TRUE keep only the earliest exposure per patient x drug.
 #' @param inc_original_cols If TRUE include original input columns in the output; otherwise return a slim cohort table.
 #'
@@ -30,7 +30,7 @@ meds <- function(data,
                  dose = "dose",
                  route_filter = NULL,
                  date_range = NULL,
-                 first_only = TRUE,
+                 first_only = FALSE,
                  inc_original_cols = FALSE) {
   # Defensive checks
   if (!is.data.frame(data)) stop("`data` must be a data.frame or tibble.")
