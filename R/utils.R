@@ -5,6 +5,6 @@ if (getRversion() >= "2.15.1") {
     "first_date", "last_date", "diagnosis_flag", "is_canonical",
     "bc_proc_concept", ".data", ".proc_code_raw", "code_norm", "group",
     "cohort_name", "cohort_count", "cohort_start", ".order_date_parsed",
-    ".med_name_norm", "drug_matched", "cohort_flag"
+    ".med_name_norm", "drug_matched", "cohort_flag", "desc", "n_tests"
   ))
 }
