@@ -9,10 +9,10 @@
 #' @param lab_name_col Name of the lab_name column in data.
 #' @param date_range Beginning and ending dates to look for.
 #' @param cohort_type Type of cohort to find. One of:
-#' - any.  Returns one row per patient matching the query.
-#' - first.  Returns the first time a patient had that lab.
-#' - last.  Returns the last time the patient had that lab.
-#' - all.  Returns all occurrences that match the query.
+#' - any.  Returns one row per patient who has at least one matched lab.
+#' - first.  Returns a single row per patient corresponding to the earliest matched lab event.
+#' - last.  Returns a single row per patient corresponding to the most recent matched lab event.
+#' - all.  Returns every matched event row for every patient who meets the criteria.
 
 #' @param min_tests Minimum number of occurrences per patient to filter for.
 #'
@@ -123,9 +123,10 @@ labs <- function(data,
       dplyr::arrange(!!ldate, .by_group = TRUE) %>%
       dplyr::slice_head(n = 1) %>%
       dplyr::ungroup() %>%
-      dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>%
+      dplyr::left_join(counts, by = patient_id_col) %>%
       dplyr::filter(n_tests >= min_tests) %>%
       dplyr::select(!!pid, !!ldate, !!lname, n_tests)
+
     return(result)
   }
 
@@ -136,9 +137,10 @@ labs <- function(data,
       dplyr::arrange(desc(!!ldate), .by_group = TRUE) %>%
       dplyr::slice_head(n = 1) %>%
       dplyr::ungroup() %>%
-      dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>%
+      dplyr::left_join(counts, by = patient_id_col) %>%
       dplyr::filter(n_tests >= min_tests) %>%
       dplyr::select(!!pid, !!ldate, !!lname, n_tests)
+
     return(result)
   }
 
@@ -147,7 +149,8 @@ labs <- function(data,
     result <- data_matched %>% dplyr::arrange(!!pid, !!ldate)
     if (min_tests > 1) {
       counts <- data_matched %>% dplyr::count(!!pid, name = "n_tests")
-      result <- result %>% dplyr::left_join(counts, by = setNames("n", patient_id_col)) %>% dplyr::filter(n_tests >= min_tests)
+      result <- result %>% dplyr::left_join(counts, by = patient_id_col) %>% dplyr::filter(n_tests >= min_tests)
+
     }
     return(result %>% dplyr::select(!!pid, !!ldate, !!lname, dplyr::everything()))
   }

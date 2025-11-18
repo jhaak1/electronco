@@ -34,10 +34,10 @@ Can be 'exact' or 'contains'.}
 
 \item{cohort_type}{Type of cohort to find. One of:
 \itemize{
-\item any.  Returns one row per patient matching the query.
-\item first.  Returns the first time a patient had that lab.
-\item last.  Returns the last time the patient had that lab.
-\item all.  Returns all occurrences that match the query.
+\item any.  Returns one row per patient who has at least one matched lab.
+\item first.  Returns a single row per patient corresponding to the earliest matched lab event.
+\item last.  Returns a single row per patient corresponding to the most recent matched lab event.
+\item all.  Returns every matched event row for every patient who meets the criteria.
 }}
 
 \item{min_tests}{Minimum number of occurrences per patient to filter for.}
