@@ -66,13 +66,15 @@ labs <- function(data,
     }
   }
 
-  # Match markers.
+  # Match markers (case-insensitive).
   lab_vec <- as.character(data[[lab_name_col]])
   matches <- rep(FALSE, length(lab_vec))
 
   if (match_type == "exact") {
-    markers_set <- unique(as.character(markers))
-    matches <- lab_vec %in% markers_set
+    # case-insensitive exact match: compare lowercased values
+    lab_lower <- tolower(lab_vec)
+    markers_set <- unique(tolower(as.character(markers)))
+    matches <- lab_lower %in% markers_set
   } else if (match_type == "contains") {
     # Literal, case-insensitive substring matching without regex.
     # Use stringr::fixed to avoid regex interpretation and set ignore_case = TRUE.
