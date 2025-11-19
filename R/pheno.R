@@ -284,7 +284,14 @@ pheno <- function(spec,
     if (length(dates) == 0) NA_Date_ else min(dates)
   }
   rows_full <- base %>% purrr::pmap(function(...) list(...))
-  earliest_dates <- purrr::map(rows_full, get_earliest) %>% lubridate::as_date()
+  earliest_dates_chr <- purrr::map_chr(rows_full, function(row) {
+    date_cols <- grep("_date$", names(row), value = TRUE)
+    dates <- unlist(row[date_cols])
+    dates <- as.Date(dates)
+    dates <- dates[!is.na(dates)]
+    if (length(dates) == 0) NA_character_ else as.character(min(dates))
+  })
+  earliest_dates <- as.Date(earliest_dates_chr)
 
   get_count <- function(row) {
     ccols <- grep("_count$", names(row), value = TRUE)
