@@ -49,43 +49,133 @@ pheno <- function(spec,
 
   # Aggregate event rows to patient-level summary
   agg_events <- function(df, patient_col = "patient_id", date_col = "date", min_count = 1, window = NULL) {
-    if (is.null(df) || !is.data.frame(df)) return(tibble::tibble(patient_id = character(0), flag = logical(0), first_date = as.Date(character(0)), count = integer(0), evidence_sample = list()))
+    if (is.null(df) || !is.data.frame(df)) {
+      return(tibble::tibble(
+        patient_id = character(0),
+        flag = logical(0),
+        first_date = as.Date(character(0)),
+        count = integer(0),
+        evidence_sample = list()
+      ))
+    }
+
     df <- in_window(df, date_col = date_col, window = window)
+
+    # ensure patient id column present and normalized
     if (!patient_col %in% names(df)) {
       pid_guess <- intersect(c("patient_id","person_id","subject_id"), names(df))[1]
       if (!is.null(pid_guess)) df <- df %>% dplyr::rename(!!patient_col := !!rlang::sym(pid_guess))
     }
-    if (!date_col %in% names(df)) return(tibble::tibble(patient_id = character(0), flag = logical(0), first_date = as.Date(character(0)), count = integer(0), evidence_sample = list()))
-    df %>%
-      dplyr::group_by(!!rlang::sym(patient_col)) %>%
-      dplyr::summarise(
-        count = dplyr::n(),
-        first_date = min(!!rlang::sym(date_col), na.rm = TRUE),
-        evidence_sample = list(dplyr::slice_head(dplyr::cur_data(), n = 5L)),
-        .groups = "drop"
-      ) %>%
-      dplyr::mutate(flag = count >= min_count) %>%
-      dplyr::rename(patient_id = !!rlang::sym(patient_col)) %>%
-      dplyr::select(patient_id, flag, first_date, count, evidence_sample)
+    if (!date_col %in% names(df)) {
+      return(tibble::tibble(
+        patient_id = character(0),
+        flag = logical(0),
+        first_date = as.Date(character(0)),
+        count = integer(0),
+        evidence_sample = list()
+      ))
+    }
+
+    # split into groups (returns a list of tibbles)
+    groups <- df %>% dplyr::group_by(!!rlang::sym(patient_col)) %>% dplyr::group_split(.keep = TRUE)
+    # compute summary per group
+    out <- purrr::map_dfr(groups, function(g) {
+      pid <- as.character(g[[patient_col]][1])
+      # ensure date column is Date
+      g[[date_col]] <- as.Date(g[[date_col]])
+      cnt <- nrow(g)
+      first_dt <- if (cnt == 0) as.Date(NA) else min(g[[date_col]], na.rm = TRUE)
+      sample_rows <- if (cnt == 0) tibble::tibble() else head(g, 5)
+      tibble::tibble(
+        patient_id = pid,
+        flag = cnt >= min_count,
+        first_date = first_dt,
+        count = as.integer(cnt),
+        evidence_sample = list(sample_rows)
+      )
+    })
+
+    # ensure class and return
+    out
   }
 
   # Convert aggregated patient_level data (cohort outputs) to standard summary
   agg_from_patient_level <- function(df, first_col = NULL, count_col = NULL, min_count = 1, window = NULL) {
-    if (is.null(df) || !is.data.frame(df)) return(tibble::tibble(patient_id = character(0), flag = logical(0), first_date = as.Date(character(0)), count = integer(0), evidence_sample = list()))
-    if (!is.null(first_col) && first_col %in% names(df)) {
-      df2 <- df %>%
-        dplyr::mutate(._first = as.Date(!!rlang::sym(first_col)),
-                      ._count = if (!is.null(count_col) && count_col %in% names(df)) as.integer(!!rlang::sym(count_col)) else 1L) %>%
-        dplyr::group_by(patient_id) %>%
-        dplyr::summarise(count = sum(._count, na.rm = TRUE),
-                         first_date = min(._first, na.rm = TRUE),
-                         evidence_sample = list(dplyr::slice_head(dplyr::cur_data(), n = 5L)),
-                         .groups = "drop") %>%
-        dplyr::mutate(flag = count >= min_count)
-      return(df2 %>% dplyr::select(patient_id, flag, first_date, count, evidence_sample))
+    if (is.null(df) || !is.data.frame(df)) {
+      return(tibble::tibble(
+        patient_id = character(0),
+        flag = logical(0),
+        first_date = as.Date(character(0)),
+        count = integer(0),
+        evidence_sample = list()
+      ))
     }
-    # fallback: try event aggregation
-    agg_events(df, date_col = "date", min_count = min_count, window = window)
+
+    # Normalize patient id column
+    if (!"patient_id" %in% names(df)) {
+      pid_guess <- intersect(c("patient_id","person_id","subject_id"), names(df))[1]
+      if (!is.null(pid_guess)) df <- df %>% dplyr::rename(patient_id = !!rlang::sym(pid_guess))
+    }
+    if (!"patient_id" %in% names(df)) {
+      return(tibble::tibble(
+        patient_id = character(0),
+        flag = logical(0),
+        first_date = as.Date(character(0)),
+        count = integer(0),
+        evidence_sample = list()
+      ))
+    }
+
+    # Prepare per-row helper columns ._first and ._count where possible
+    df2 <- df
+    if (!is.null(first_col) && first_col %in% names(df2)) {
+      df2[["_first"]] <- as.Date(df2[[first_col]])
+    } else if ("first_date" %in% names(df2)) {
+      df2[["_first"]] <- as.Date(df2[["first_date"]])
+    } else if ("cohort_start" %in% names(df2)) {
+      df2[["_first"]] <- as.Date(df2[["cohort_start"]])
+    } else {
+      # leave ._first NA if not available
+      df2[["_first"]] <- as.Date(NA)
+    }
+
+    if (!is.null(count_col) && count_col %in% names(df2)) {
+      df2[["_count"]] <- as.integer(df2[[count_col]])
+    } else if ("cohort_count" %in% names(df2)) {
+      df2[["_count"]] <- as.integer(df2[["cohort_count"]])
+    } else if ("n_total" %in% names(df2)) {
+      df2[["_count"]] <- as.integer(df2[["n_total"]])
+    } else {
+      df2[["_count"]] <- 1L
+    }
+
+    # Apply window if provided (use _first or try a date-like column)
+    date_for_window <- if ("_first" %in% names(df2)) "_first" else intersect(c("date","cohort_start","first_date"), names(df2))[1]
+    if (!is.null(window) && !is.null(date_for_window) && date_for_window %in% names(df2)) {
+      df2 <- df2 %>% dplyr::filter(as.Date(!!rlang::sym(date_for_window)) >= window$start & as.Date(!!rlang::sym(date_for_window)) <= window$end)
+    }
+
+    # Split by patient and summarize each group robustly
+    groups <- df2 %>% dplyr::group_by(patient_id) %>% dplyr::group_split(.keep = TRUE)
+    out <- purrr::map_dfr(groups, function(g) {
+      pid <- as.character(g$patient_id[1])
+      # total count is sum of ._count (fallback to number of rows if weird)
+      cnt <- tryCatch(sum(as.integer(g[["_count"]]), na.rm = TRUE), error = function(e) nrow(g))
+      # earliest first date from ._first (or NA if none)
+      first_dt <- {
+        if (all(is.na(g[["_first"]]))) as.Date(NA) else min(as.Date(g[["_first"]], origin = "1970-01-01"), na.rm = TRUE)
+      }
+      sample_rows <- if (nrow(g) == 0) tibble::tibble() else head(g, 5)
+      tibble::tibble(
+        patient_id = pid,
+        flag = cnt >= min_count,
+        first_date = first_dt,
+        count = as.integer(cnt),
+        evidence_sample = list(sample_rows)
+      )
+    })
+
+    out
   }
 
   # Derive patient universe from provided helper outputs
