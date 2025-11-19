@@ -61,7 +61,7 @@ pheno <- function(spec,
       dplyr::summarise(
         count = dplyr::n(),
         first_date = min(!!rlang::sym(date_col), na.rm = TRUE),
-        evidence_sample = list(dplyr::slice_head(dplyr::cur_data_all(), n = 5L)),
+        evidence_sample = list(dplyr::slice_head(dplyr::cur_data(), n = 5L)),
         .groups = "drop"
       ) %>%
       dplyr::mutate(flag = count >= min_count) %>%
@@ -79,7 +79,7 @@ pheno <- function(spec,
         dplyr::group_by(patient_id) %>%
         dplyr::summarise(count = sum(._count, na.rm = TRUE),
                          first_date = min(._first, na.rm = TRUE),
-                         evidence_sample = list(dplyr::slice_head(dplyr::cur_data_all(), n = 5L)),
+                         evidence_sample = list(dplyr::slice_head(dplyr::cur_data(), n = 5L)),
                          .groups = "drop") %>%
         dplyr::mutate(flag = count >= min_count)
       return(df2 %>% dplyr::select(patient_id, flag, first_date, count, evidence_sample))
