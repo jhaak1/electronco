@@ -24,7 +24,7 @@ pheno(
 
 \item{dx_tbl}{The output of diagnosis() or a vector of diagnoses to look for.}
 
-\item{return_evidence}{}
+\item{return_evidence}{Logical; if TRUE include evidence_sample list-column in the result.}
 }
 \value{
 A tibble with columns: patient_id, flag, flag_date, evidence_count, evidence_sample, spec_id, spec_version.

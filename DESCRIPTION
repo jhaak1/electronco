@@ -19,8 +19,7 @@ Imports:
     magrittr,
     rlang,
     stringr,
-    purrr,
-    digest
+    purrr
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0),

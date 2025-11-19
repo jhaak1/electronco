@@ -5,7 +5,7 @@
 #' @param proc_tbl The output of proc() or a vector of procedures to filter for.
 #' @param labs_tbl The output of labs() or a vector of labs to filter for.
 #' @param dx_tbl The output of diagnosis() or a vector of diagnoses to look for.
-#' @param return_evidence
+#' @param return_evidence Logical; if TRUE include evidence_sample list-column in the result.
 #'
 #' @export
 #'
@@ -16,6 +16,8 @@
 #' @importFrom lubridate as_date
 #' @importFrom tidyr replace_na
 #' @importFrom tibble tibble
+#' @importFrom stats na.omit
+#' @importFrom utils head
 pheno <- function(spec,
                   meds_tbl = NULL,    # meds() output rows (cohort_flag/drug_matched/date) or raw meds events
                   proc_tbl = NULL,    # proc() output list(patient_level) or raw proc events
