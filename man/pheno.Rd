@@ -27,7 +27,7 @@ pheno(
 \item{return_evidence}{}
 }
 \value{
-A tibble with columns: patient_id, flag, flag_date, evidence_count, evidence_sample, spec_id, spec_version, spec_hash.
+A tibble with columns: patient_id, flag, flag_date, evidence_count, evidence_sample, spec_id, spec_version.
 }
 \description{
 Produce Composite Phenotype Flags

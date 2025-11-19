@@ -9,11 +9,10 @@
 #'
 #' @export
 #'
-#' @return A tibble with columns: patient_id, flag, flag_date, evidence_count, evidence_sample, spec_id, spec_version, spec_hash.
+#' @return A tibble with columns: patient_id, flag, flag_date, evidence_count, evidence_sample, spec_id, spec_version.
 #' @importFrom dplyr filter mutate select rename arrange group_by summarise left_join slice_head slice_min n cur_data_all coalesce
 #' @importFrom purrr map map_lgl map_int map_dbl map_chr pmap reduce compact
 #' @importFrom rlang sym expr `!!`
-#' @importFrom digest digest
 #' @importFrom lubridate as_date
 #' @importFrom tidyr replace_na
 #' @importFrom tibble tibble
@@ -28,7 +27,6 @@ pheno <- function(spec,
   if (!is.list(spec)) stop("spec must be a named list")
   spec_id      <- spec$id %||% "unnamed"
   spec_version <- spec$version %||% "0.0"
-  spec_hash    <- digest::digest(spec)
 
   # Optional date window (if you want to constrain by date for all sources)
   window <- NULL
@@ -325,8 +323,7 @@ pheno <- function(spec,
     evidence_count = evidence_counts,
     evidence_sample = evidence_samples,
     spec_id = spec_id,
-    spec_version = spec_version,
-    spec_hash = spec_hash
+    spec_version = spec_version
   )
 
   if (!isTRUE(return_evidence)) result <- result %>% dplyr::select(-evidence_sample)
