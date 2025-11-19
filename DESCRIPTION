@@ -18,7 +18,9 @@ Imports:
     tidyr,
     magrittr,
     rlang,
-    stringr
+    stringr,
+    purrr,
+    digest
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0),
