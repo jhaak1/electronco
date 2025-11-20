@@ -1,26 +1,26 @@
 #' Extract diagnosis phenotype from diagnosis data.
 #'
 #' Inputs:
-#'  - diagnoses: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
+#'  - data: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
 #'  - concept_set (included with package): tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 #'
 #' Output: list(patient_level, evidence).
-#' @param diagnoses Dataset imported from a database or csv file.
+#' @param data Dataset imported from a database or csv file.
 #' @param concept Concept to look for. For breast cancer, specify 'bc'.
 #' @param lookback_start Beginning date of date range to look at in YYYY-MM-DD (year-month-day) format.
 #' @param lookback_end End date of date range to look at in YYYY-MM-DD (year-month-day) format.
 #' @param min_events The minimum number of occurrences of a given concept.
-#' @param patient_id_col Name of the patient_id column in the "diagnoses" dataset.
-#' @param code_col Name of the code column in the "diagnoses" dataset.
-#' @param system Name of the code_type column in the "diagnoses" dataset.
-#' @param date_col Name of the diagnosis_date column in the "diagnoses" dataset.
-#' @param date_format R date format of the diagnosis_date column in the "diagnoses" dataset (e.g. '%Y-%m-%d').
+#' @param patient_id_col Name of the patient_id column in data.
+#' @param code_col Name of the code column in data.
+#' @param system Name of the code_type column in data.
+#' @param date_col Name of the diagnosis_date column in data.
+#' @param date_format R date format of the diagnosis_date column in data (e.g. '%Y-%m-%d').
 #' @export
 #' @importFrom dplyr mutate across all_of rename left_join group_by summarize arrange distinct n case_when select
 #' @importFrom tidyr replace_na
 #' @importFrom lubridate as_date
 #' @importFrom magrittr %>%
-diagnosis <- function(diagnoses,
+diagnosis <- function(data,
                       concept,
                       lookback_start,
                       lookback_end,
@@ -37,13 +37,13 @@ diagnosis <- function(diagnoses,
 
   # Validate input columns early.
   required <- c(patient_id_col, code_col, system, date_col)
-  missing_cols <- setdiff(required, names(diagnoses))
+  missing_cols <- setdiff(required, names(data))
   if (length(missing_cols) > 0L) {
-    stop("diagnoses is missing columns: ", paste(missing_cols, collapse = ", "))
+    stop("data is missing columns: ", paste(missing_cols, collapse = ", "))
   }
 
   # Normalize types and values using programmatic column selection.
-  diagnoses <- diagnoses %>%
+  data <- data %>%
     dplyr::mutate(
       # Ensure patient id string.
       dplyr::across(dplyr::all_of(patient_id_col), as.character),
@@ -55,7 +55,7 @@ diagnosis <- function(diagnoses,
     )
 
   # Canonicalize names to patient_id / code / system / date for downstream code.
-  diag <- diagnoses %>%
+  diag <- data %>%
     dplyr::rename(
       patient_id = dplyr::all_of(patient_id_col),
       code       = dplyr::all_of(code_col),
@@ -84,7 +84,7 @@ diagnosis <- function(diagnoses,
   concept_set <- concept_set %>%
     dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
-  # Join diagnoses with concept set.
+  # Join data with concept set.
   evidence <- diag %>%
     dplyr::left_join(concept_set, by = c("code", "system")) %>%
     dplyr::mutate(

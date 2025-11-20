@@ -5,7 +5,7 @@
 \title{Extract diagnosis phenotype from diagnosis data.}
 \usage{
 diagnosis(
-  diagnoses,
+  data,
   concept,
   lookback_start,
   lookback_end,
@@ -18,7 +18,7 @@ diagnosis(
 )
 }
 \arguments{
-\item{diagnoses}{Dataset imported from a database or csv file.}
+\item{data}{Dataset imported from a database or csv file.}
 
 \item{concept}{Concept to look for. For breast cancer, specify 'bc'.}
 
@@ -28,20 +28,20 @@ diagnosis(
 
 \item{min_events}{The minimum number of occurrences of a given concept.}
 
-\item{patient_id_col}{Name of the patient_id column in the "diagnoses" dataset.}
+\item{patient_id_col}{Name of the patient_id column in data.}
 
-\item{code_col}{Name of the code column in the "diagnoses" dataset.}
+\item{code_col}{Name of the code column in data.}
 
-\item{system}{Name of the code_type column in the "diagnoses" dataset.}
+\item{system}{Name of the code_type column in data.}
 
-\item{date_col}{Name of the diagnosis_date column in the "diagnoses" dataset.}
+\item{date_col}{Name of the diagnosis_date column in data.}
 
-\item{date_format}{R date format of the diagnosis_date column in the "diagnoses" dataset (e.g. '\%Y-\%m-\%d').}
+\item{date_format}{R date format of the diagnosis_date column in data (e.g. '\%Y-\%m-\%d').}
 }
 \description{
 Inputs:
 \itemize{
-\item diagnoses: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
+\item data: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.
 \item concept_set (included with package): tibble with the following columns: code, code_type, include (logical TRUE=include, FALSE=exclude).
 }
 }

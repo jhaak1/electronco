@@ -16,7 +16,7 @@ local({
     bad_df <- tibble(patient_id = 1:3, code = c("C50","C50","C50"))
     expect_error(
       diagnosis(bad_df, concept = test_concept_tbl, lookback_start = "2020-01-01", lookback_end = "2020-12-31"),
-      regexp = "diagnoses is missing columns"
+      regexp = "data is missing columns"
     )
   })
 
