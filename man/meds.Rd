@@ -39,7 +39,7 @@ Paclitaxel, pembrolizumab, pertuzumab, Tamoxifen, Trastuzumab.}
 
 \item{route_filter}{Character vector of allowed routes (case-insensitive); NULL to skip.}
 
-\item{date_range}{Date window c(start, end) where dates are in YYYY-MM-DD format (e.g. 2025-01-01).}
+\item{date_range}{Date window c(start, end) where dates are in YYYY-MM-DD format (e.g. c('2010-01-01', '2025-01-01')).}
 
 \item{first_only}{If TRUE keep only the earliest exposure per patient x drug.}
 
