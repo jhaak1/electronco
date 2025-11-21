@@ -5,14 +5,13 @@
 #' multiple sources, the returned list preserves the `sources` sub-list and
 #' includes combination metadata when present.
 #'
-#' @param dataset Character. The dataset name to look up.  This can be one of three
-#' possibilities: 'icd9', 'icd10', or 'cpt'.
+#' @param dataset Character. The dataset name to look up.  This can be one of five
+#' possibilities: 'icd9', 'icd10', 'cpt', 'bc' (for breast cancer diagnosis groups), or
+#' 'bc_proc' (for breast cancer procedure groups).
 #' @param file Character. Path to VERSIONS.yaml. Defaults to the installed package:
 #'        system.file("extdata", "VERSIONS.yaml", package = "electronco").
 #' @return Named list with the provenance record for `dataset`. If no match is
 #'         found, invisible NULL is returned and a warning is issued.
-#' @examples
-#' codemetadata("icd10")
 #' @export
 #' @importFrom yaml read_yaml
 codemetadata <- function(dataset,

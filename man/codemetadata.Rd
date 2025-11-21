@@ -10,8 +10,9 @@ codemetadata(
 )
 }
 \arguments{
-\item{dataset}{Character. The dataset name to look up.  This can be one of three
-possibilities: 'icd9', 'icd10', or 'cpt'.}
+\item{dataset}{Character. The dataset name to look up.  This can be one of five
+possibilities: 'icd9', 'icd10', 'cpt', 'bc' (for breast cancer diagnosis groups), or
+'bc_proc' (for breast cancer procedure groups).}
 
 \item{file}{Character. Path to VERSIONS.yaml. Defaults to the installed package:
 system.file("extdata", "VERSIONS.yaml", package = "electronco").}
@@ -25,7 +26,4 @@ Reads VERSIONS.yaml (installed extdata) and returns the provenance
 record for a single dataset as a named list. If the dataset was produced from
 multiple sources, the returned list preserves the \code{sources} sub-list and
 includes combination metadata when present.
-}
-\examples{
-codemetadata("icd10")
 }
