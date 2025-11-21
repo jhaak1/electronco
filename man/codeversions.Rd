@@ -13,11 +13,9 @@ codeversions(
 }
 \value{
 tibble with the following columns: dataset, data_version, and retrieved.
+codeversions()
 }
 \description{
 Returns a tibble with the following columns: dataset, data_version, and retrieved.
 Looks for VERSIONS.yaml under inst/extdata of the installed package.
-}
-\examples{
-codeversions()
 }

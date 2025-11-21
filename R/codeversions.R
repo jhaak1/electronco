@@ -5,7 +5,6 @@
 #'
 #' @param file Path to VERSIONS.yaml. Defaults to system file in the installed package.
 #' @return tibble with the following columns: dataset, data_version, and retrieved.
-#' @examples
 #' codeversions()
 #' @export
 #' @importFrom yaml read_yaml
