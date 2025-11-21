@@ -1,4 +1,4 @@
-#' Extract diagnosis phenotype from diagnosis data.
+#' Extract diagnosis cohorts from diagnosis data.
 #'
 #' Inputs:
 #'  - data: tibble or data frame with the following columns: patient_id, code, code_type, diagnosis_date.

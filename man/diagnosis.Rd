@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnosis.R
 \name{diagnosis}
 \alias{diagnosis}
-\title{Extract diagnosis phenotype from diagnosis data.}
+\title{Extract diagnosis cohorts from diagnosis data.}
 \usage{
 diagnosis(
   data,
