@@ -5,7 +5,7 @@
 #' @param proc_tbl The output of proc() or a vector of procedures to filter for.
 #' @param labs_tbl The output of labs() or a vector of labs to filter for.
 #' @param dx_tbl The output of diagnosis() or a vector of diagnoses to look for.
-#' If using the output of diagnosis, be sure to specify the patients level list
+#' If using the output of diagnosis(), be sure to specify the patient_level list
 #' (e.g. dx_tbl = diagnosis_output$patient_level).
 #' @param return_evidence Logical; if TRUE include evidence_sample list-column in the result.
 #'
