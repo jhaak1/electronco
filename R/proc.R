@@ -15,7 +15,8 @@
 #' @param min_count Minimum number of matching procedures to qualify for cohort (default 1).
 #' @param first_only Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).
 #' @param code_list An optional custom dataframe or tibble of codes to use.
-#' @return tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).
+#' @return tibble of cohorts (patient_id, cohort_name, cohort_count, cohort_start,
+#' cohort_end, sample_codes, proc_flag).
 #' @export
 #' @importFrom stats setNames
 #' @importFrom dplyr as_tibble mutate filter inner_join select group_by summarize rename slice_min ungroup

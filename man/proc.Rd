@@ -48,7 +48,8 @@ and 'follow-up care'.}
 \item{code_list}{An optional custom dataframe or tibble of codes to use.}
 }
 \value{
-tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).
+tibble of cohorts (patient_id, cohort_name, cohort_count, cohort_start,
+cohort_end, sample_codes, proc_flag).
 }
 \description{
 Extract procedure cohorts from local data.
