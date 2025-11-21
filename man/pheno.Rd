@@ -14,7 +14,7 @@ pheno(
 )
 }
 \arguments{
-\item{spec}{A list of id, version, date_range, meds, procs, dx, labs, rule, and min_count.}
+\item{spec}{A list of id, version, date_range, rule, and min_count.}
 
 \item{meds_tbl}{The output of meds() or a vector of medications to filter for.}
 
@@ -22,7 +22,9 @@ pheno(
 
 \item{labs_tbl}{The output of labs() or a vector of labs to filter for.}
 
-\item{dx_tbl}{The output of diagnosis() or a vector of diagnoses to look for.}
+\item{dx_tbl}{The output of diagnosis() or a vector of diagnoses to look for.
+If using the output of diagnosis, be sure to specify the patients level list
+(e.g. dx_tbl = diagnosis_output$patient_level).}
 
 \item{return_evidence}{Logical; if TRUE include evidence_sample list-column in the result.}
 }

@@ -1,10 +1,12 @@
 #' Produce Composite Phenotype Flags
 #'
-#' @param spec A list of id, version, date_range, meds, procs, dx, labs, rule, and min_count.
+#' @param spec A list of id, version, date_range, rule, and min_count.
 #' @param meds_tbl The output of meds() or a vector of medications to filter for.
 #' @param proc_tbl The output of proc() or a vector of procedures to filter for.
 #' @param labs_tbl The output of labs() or a vector of labs to filter for.
 #' @param dx_tbl The output of diagnosis() or a vector of diagnoses to look for.
+#' If using the output of diagnosis, be sure to specify the patients level list
+#' (e.g. dx_tbl = diagnosis_output$patient_level).
 #' @param return_evidence Logical; if TRUE include evidence_sample list-column in the result.
 #'
 #' @export
