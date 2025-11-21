@@ -45,7 +45,7 @@ and 'follow-up care'.}
 
 \item{first_only}{Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).}
 
-\item{code_list}{A custom dataframe or tibble of codes to use.}
+\item{code_list}{An optional custom dataframe or tibble of codes to use.}
 }
 \value{
 tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).

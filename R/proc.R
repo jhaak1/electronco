@@ -14,7 +14,7 @@
 #' @param date_range Optional c(start, end) to limit procedures considered.
 #' @param min_count Minimum number of matching procedures to qualify for cohort (default 1).
 #' @param first_only Logical; if TRUE cohort_start is first match and only that is used for inclusion (default FALSE).
-#' @param code_list A custom dataframe or tibble of codes to use.
+#' @param code_list An optional custom dataframe or tibble of codes to use.
 #' @return tibble of cohorts (patient_id, cohort_name, cohort_start, cohort_end, cohort_count).
 #' @export
 #' @importFrom stats setNames
@@ -114,7 +114,5 @@ proc <- function(data,
       dplyr::ungroup()
   }
 
-  list(
-    patient_level = cohorts
-  )
+   patient_level = cohorts
 }
