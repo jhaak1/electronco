@@ -1,11 +1,7 @@
 #' Extract medication cohorts.
 #'
 #' @param data Dataframe or tibble of medication data.
-#' @param drugs A vector of drugs to filter for. Options include:
-#' 5-fluorouracil, ado-trastuzumab emtansine, Anastrazole, bevacizumab,
-#' Capecitabine, Carboplatin, Cisplatin, Cyclophosphamide, Docetaxel,
-#' Doxorubicin, Epirubicin, Everolimus, Exemestane, Letrozole, Oxaliplatin,
-#' Paclitaxel, pembrolizumab, pertuzumab, Tamoxifen, Trastuzumab.
+#' @param drugs A vector of drugs to filter for (case-insensitive exact matches against med_name).
 #' @param patient_id Name of the patient_id column in data.
 #' @param order_date Name of the order_date column in data.
 #' @param med_name Name of the med_name column in data.
@@ -43,24 +39,11 @@ meds <- function(data,
     if (!(length(date_range) == 2)) stop("`date_range` must be a length-2 vector (start, end).")
   }
 
-  # Canonical allowed drug list (lowercase, trimmed)
-  allowed_drugs <- c(
-    "5-fluorouracil", "anastrazole", "capecitabine", "carboplatin",
-    "cisplatin", "docetaxel", "doxorubicin", "letrozole", "oxaliplatin",
-    "paclitaxel", "tamoxifen", "trastuzumab", "cyclophosphamide",
-    "everolimus", "epirubicin", "exemestane", "ado-trastuzumab emtansine",
-    "bevacizumab", "pembrolizumab", "pertuzumab"
-  )
-
-  # Validate user drugs
+  # Validate user drugs input (must be non-empty)
   if (missing(drugs) || length(drugs) == 0) stop("`drugs` must be a non-empty character vector.")
   user_drugs_norm <- as.character(unlist(drugs)) %>%
     stringr::str_to_lower() %>%
     stringr::str_trim()
-  not_allowed <- setdiff(user_drugs_norm, allowed_drugs)
-  if (length(not_allowed) > 0) {
-    stop("Some requested drugs are not in the allowed list: ", paste(not_allowed, collapse = ", "))
-  }
 
   # Prepare working data with helper columns (will be removed before return)
   df_work <- data %>%
@@ -95,7 +78,7 @@ meds <- function(data,
     df_work <- df_work %>% dplyr::filter(stringr::str_to_lower(stringr::str_trim(.data[[route]])) %in% rf_norm)
   }
 
-  # Exact normalized match against the validated user drugs
+  # Exact normalized match against the provided user drugs (case-insensitive)
   df_matched <- df_work %>%
     dplyr::filter(.med_name_norm %in% user_drugs_norm) %>%
     dplyr::mutate(

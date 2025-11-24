@@ -21,11 +21,7 @@ meds(
 \arguments{
 \item{data}{Dataframe or tibble of medication data.}
 
-\item{drugs}{A vector of drugs to filter for. Options include:
-5-fluorouracil, ado-trastuzumab emtansine, Anastrazole, bevacizumab,
-Capecitabine, Carboplatin, Cisplatin, Cyclophosphamide, Docetaxel,
-Doxorubicin, Epirubicin, Everolimus, Exemestane, Letrozole, Oxaliplatin,
-Paclitaxel, pembrolizumab, pertuzumab, Tamoxifen, Trastuzumab.}
+\item{drugs}{A vector of drugs to filter for (case-insensitive exact matches against med_name).}
 
 \item{patient_id}{Name of the patient_id column in data.}
 
