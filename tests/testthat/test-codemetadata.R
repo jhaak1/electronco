@@ -67,7 +67,6 @@ test_that("valid YAML returns provenance record with normalized fields", {
   expect_equal(rec$dataset, "icd9")
   expect_equal(rec$data_version, "v1")
   expect_equal(rec$retrieved, "2025-01-01")
-  expect_true("_versions_file" %in% names(rec))
 })
 
 test_that("sources list is normalized and missing fields filled with NA", {

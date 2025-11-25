@@ -85,8 +85,5 @@ codemetadata <- function(dataset,
     })
   }
 
-  # Add the file path used to locate the VERSIONS file.
-  rec[["_versions_file"]] <- as.character(file)
-
   return(rec)
 }
