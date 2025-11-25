@@ -20,7 +20,6 @@ pkgload::load_all(".")
 knitr::opts_chunk$set(eval = TRUE)
 ```
 
-
 ![](inst/extdata/electronco_logo.png)
 
 **electronco is an R package for extracting patient cohorts and flagging complex** 

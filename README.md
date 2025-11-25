@@ -359,9 +359,4 @@ codemetadata('icd10')
 #> 
 #> $sources[[2]]$retrieved
 #> [1] "2025-10-29"
-#> 
-#> 
-#> 
-#> $`_versions_file`
-#> [1] "/home/jeremy/Desktop/electronco/inst/extdata/VERSIONS.yaml"
 ```
