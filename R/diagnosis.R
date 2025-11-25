@@ -67,7 +67,6 @@ diagnosis <- function(data,
     dplyr::mutate(code = toupper(trimws(code)), system = toupper(trimws(system)))
 
   # Get concept set.
-  # Get concept set.
   if (is.data.frame(concept)) {
     # If caller passed a concept tibble directly, use it
     concept_set <- concept

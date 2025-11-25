@@ -2,8 +2,9 @@ Package: electronco
 Title: Analyze EHR Data
 Version: 0.0.0.9000
 Authors@R: 
-    person("Jeremy", "Haakenson", , "jkhaak@gmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Jeremy", "Haakenson", role = c("aut", "cre"))
+Description: This package extracts patient cohorts and flags complex phenotypes 
+    in electronic health records (EHR).
 License: LGPL (>= 3) + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
