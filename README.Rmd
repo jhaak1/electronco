@@ -1,0 +1,241 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# electronco
+
+```{r setup, include=FALSE}
+pkgload::load_all(".")
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+
+![](inst/extdata/electronco_logo.png)
+
+**electronco is an R package for extracting patient cohorts and flagging complex** 
+**phenotypes in electronic health records (EHR) based on diagnoses, procedures,**
+**medications, and lab tests.  Diagnosis and procedure cohorts are based on** 
+**versioned ICD9, ICD10, and CPT code lists.  A versioned diagnosis concept set**
+**and versioned procedure groups are currently available for breast cancer.**
+
+## Installation
+
+**You can install electronco as follows.  If you do not already have the remotes**
+**package installed, use the first line of code (after the #) before installing**
+**electronco.**
+
+``` r
+# install.packages("remotes")
+remotes::install_github("jhaak1/electronco")
+```
+
+## 1.  Connect to your database or upload files.
+**Here is an example using a Postgres SQL database.**
+
+```{r}
+library(DBI)
+library(RPostgres)
+
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname   = "ehr",
+  host     = Sys.getenv("PG_HOST", "localhost"),
+  port     = as.integer(Sys.getenv("PG_PORT", 5432)),
+  user     = Sys.getenv("PG_USER", Sys.getenv("DB_USER")),
+  password = Sys.getenv("PG_PASSWORD", Sys.getenv("DB_PASS"))
+)
+```
+
+## 2. Make a patient cohort based on diagnoses.
+**If you are working with a large database, I recommend doing as much filtering as**
+**possible in SQL (e.g. with WHERE statements in the dbGetQuery() call below).**
+**If using a local file, you can use read.csv(), read_csv(), etc.**
+
+```{r}
+dia1 = dbGetQuery(con, "
+  SELECT *
+  FROM public.diagnoses
+")
+```
+
+**Now you can use the diagnosis() function to make your patient cohort.  In this** 
+**example, I set concept to 'bc' for breast cancer.  This concept set comes with**
+**electronco.  You can also use a custom concept set, which should be a dataframe with**
+**the following columns: code (e.g. C50.01), system (e.g. icd10), and include (**
+**TRUE for every row in the set).  If using a custom concept set, you can set concept to the name of your dataframe.**
+
+```{r}
+#library(electronco)
+
+d1 = diagnosis(
+      data = dia1,
+      concept = 'bc',
+      lookback_start = '2011-01-01',
+      lookback_end = '2023-01-01',
+      min_events = 1,
+      patient_id_col = "patient_id",
+      code_col = "code",
+      system = "code_type",
+      date_col = "diagnosis_date",
+      date_format = "%Y-%m-%d"
+)
+
+head(d1$patient_level, 10)
+head(d1$evidence, 10)
+```
+
+## 3. Make a patient cohort based on procedures.
+**First, select the desired patients from your database.**
+
+```{r}
+pro1 = dbGetQuery(con, "
+  SELECT *
+  FROM public.procedures
+")
+```
+
+**Next, refine your patient cohort using proc().**
+
+```{r}
+p1 = proc(
+      data = pro1,
+      proc_group = c("breast cancer screening", "diagnostic mammography",
+        "breast ultrasound", "mri of the breast", "needle biopsy",
+        "breast specimen radiography", "pathology", "tumor marker testing",
+        "breast-conserving surgery", "mastectomy procedure"),
+      patient_id_col = "patient_id",
+      code_col = "cpt_code",
+      date_col = "proc_date",
+      date_format = NULL,
+      date_range = NULL,
+      min_count = 1,
+      first_only = FALSE,
+      code_list = NULL
+)
+
+head(p1, 10)
+```
+
+## 4. Make a patient cohort based on medications.
+**Read in your medication data.**
+
+```{r}
+med1 = dbGetQuery(con, "
+  SELECT *
+  FROM public.meds
+")
+```
+
+**Make your medication-based patient cohort using meds().**
+
+```{r}
+m1 = meds(
+      data = med1,
+      drugs = c('tamoxifen', 'trastuzumab', 'doxorubicin'),
+      patient_id = "patient_id",
+      order_date = "order_date",
+      med_name = "med_name",
+      route = "route",
+      dose = "dose",
+      route_filter = NULL,
+      date_range = NULL,
+      first_only = FALSE,
+      inc_original_cols = FALSE
+)
+
+head(m1, 10)
+```
+
+## 5. Make a patient cohort based on lab tests.
+**Read in your data.**
+
+```{r}
+lab1 = dbGetQuery(con, "
+  SELECT *
+  FROM public.labs
+")
+```
+
+**Use labs() to make a patient cohort.**
+
+```{r}
+l1 = labs(
+      data = lab1,
+      markers = c('CA-125', 'hemoglobin', 'CEA', 'ER', 'PR', 'HER2'),
+      match_type = "exact",
+      patient_id_col = "patient_id",
+      lab_date_col = "lab_date",
+      lab_name_col = "lab_name",
+      date_range = NULL,
+      cohort_type = "all",
+      min_tests = 1
+)
+
+head(l1, 10)
+```
+
+**Diconnect from your database.**
+
+```{r}
+dbDisconnect(con)
+```
+
+## 6. Flag a desired phenotype based on diagnoses, procedures, medications, and lab tests.
+**pheno() uses the output of diagnosis(), proc(), meds(), and labs() or user** 
+**supplied vectors of diagnoses, procedures, medications, and lab tests.**
+
+**First, set up your custom specification.**
+
+```{r}
+spec = list(id = "Best Spec Ever",
+            version = '1.0.0',
+            date_range = c('2010-01-01', '2025-01-01'),
+            rule = 'any',
+            min_count = 1)
+```
+
+**Then run pheno() to flag your desired phenotype.  If you're using the output** 
+**of diagnosis() for dx_tbl, make sure you specify the patient_level dataframe.**
+
+```{r}
+pheno1 = pheno(
+          spec = spec,
+          meds_tbl = m1,
+          proc_tbl = p1,
+          labs_tbl = l1,
+          dx_tbl = d1$patient_level,
+          return_evidence = TRUE
+)
+
+head(pheno1, 10)
+```
+
+**You can look at the evidence_sample column for any patient to see why that** 
+**patient was flagged.**
+
+```{r}
+pheno1$evidence_sample[1]
+```
+
+## 7. View the code versions being used with your version of electronco.
+
+```{r}
+codeversions()
+```
+
+## 8. To see more detailed metadata for each code list, use codemetadata().
+
+```{r}
+codemetadata('icd10')
+```
